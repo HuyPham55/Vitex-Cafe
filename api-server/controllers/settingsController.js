@@ -16,16 +16,25 @@ const getSettings = async (req, res) => {
 // @desc    Update store settings
 // @route   PUT /api/settings
 // @access  Private/Admin
-const updateSettings = async (req, res) => {
-    try {
-        let settings = await StoreSettings.findOne();
-        if (!settings) {
-            settings = new StoreSettings(req.body);
-        } else {
-            Object.assign(settings, req.body);
-        }
-        const savedSettings = await settings.save();
-        res.json(savedSettings);
+    const updateSettings = async (req, res) => {
+        try {
+            let settings = await StoreSettings.findOne();
+            if (!settings) {
+                settings = new StoreSettings(req.body);
+            } else {
+                Object.assign(settings, req.body);
+            }
+
+            // Handle hero images
+            let existingImages = req.body.existingHeroImages || [];
+            if (typeof existingImages === 'string') {
+                existingImages = [existingImages];
+            }
+            const newImages = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+            settings.heroImages = [...existingImages, ...newImages];
+
+            const savedSettings = await settings.save();
+            res.json(savedSettings);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

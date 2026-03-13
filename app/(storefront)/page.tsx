@@ -8,6 +8,10 @@ import { fetchAPI, endpoints } from '@/lib/api';
 export default function Home() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heroImages, setHeroImages] = useState<string[]>([
+    'https://lh3.googleusercontent.com/aida-public/AB6AXuBBS7MjMdfwCv1DqRLY5YHgD8XRyOsNHseJidVw67eg4s0rItgSTVEKs1YsCAoYPyzO4MsnykLv1Ktwepj6z-pXsx_F_gUztpAA9g2Jvle5oLF0RFSZD34YrTM3DrJdyFgwySZi28siaqS1kU72N9J-htErWvr_U7hWpIGhcY8BZqUHsY2FO8_8nSG44ZdLan2A0HmsJbQUQwIE0a5P8i9K9MdnetqR7OQKCkxIQf58JdmiReEQBGc7z6l4AzRtOIqi9hUKPgwX'
+  ]);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const getOrders = async () => {
@@ -21,11 +25,30 @@ export default function Home() {
         setLoading(false);
       }
     };
+    const getSettings = async () => {
+      try {
+        const data = await fetchAPI(endpoints.settings);
+        if (data.heroImages && data.heroImages.length > 0) {
+          setHeroImages(data.heroImages);
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
 
     getOrders();
+    getSettings();
     const interval = setInterval(getOrders, 10000); // Polling every 10s
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroImages.length);
+    }, 5000); // Autoplay every 5 seconds
+    return () => clearInterval(timer);
+  }, [heroImages]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -52,9 +75,16 @@ export default function Home() {
         <section className="@container">
           <div className="@[480px]:p-2">
             <div
-              className="flex min-h-[520px] flex-col gap-8 bg-cover bg-center bg-no-repeat @[480px]:rounded-xl items-center justify-center p-6 text-center relative overflow-hidden"
-              style={{ backgroundImage: 'linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBBS7MjMdfwCv1DqRLY5YHgD8XRyOsNHseJidVw67eg4s0rItgSTVEKs1YsCAoYPyzO4MsnykLv1Ktwepj6z-pXsx_F_gUztpAA9g2Jvle5oLF0RFSZD34YrTM3DrJdyFgwySZi28siaqS1kU72N9J-htErWvr_U7hWpIGhcY8BZqUHsY2FO8_8nSG44ZdLan2A0HmsJbQUQwIE0a5P8i9K9MdnetqR7OQKCkxIQf58JdmiReEQBGc7z6l4AzRtOIqi9hUKPgwX")' }}
+              className="flex min-h-[520px] flex-col gap-8 @[480px]:rounded-xl items-center justify-center p-6 text-center relative overflow-hidden"
             >
+              {heroImages.map((img, i) => (
+                <div 
+                  key={i} 
+                  className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${i === currentSlide ? 'opacity-100' : 'opacity-0'}`} 
+                  style={{ backgroundImage: `linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("${img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`}")` }}
+                />
+              ))}
+
               <div className="flex flex-col gap-4 max-w-2xl z-10">
                 <h1 className="text-white text-5xl font-black leading-tight tracking-tight @[480px]:text-6xl">
                   Experience the <span className="text-primary">Perfect Brew</span>

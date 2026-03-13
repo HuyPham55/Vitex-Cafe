@@ -13,6 +13,7 @@ export default function MenuManagement() {
   const [products, setProducts] = useState<any[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currencySymbol, setCurrencySymbol] = useState('$');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
@@ -29,12 +30,14 @@ export default function MenuManagement() {
 
   const getData = async () => {
     try {
-      const [prodData, varData] = await Promise.all([
+      const [prodData, varData, settings] = await Promise.all([
         fetchAPI(endpoints.products),
-        fetchAPI(endpoints.variants)
+        fetchAPI(endpoints.variants),
+        fetchAPI(endpoints.settings)
       ]);
       setProducts(prodData);
       setVariants(varData);
+      setCurrencySymbol(settings.currencySymbol || '$');
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -154,8 +157,8 @@ export default function MenuManagement() {
                 <button
                   onClick={() => toggleStock(product)}
                   className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-md ${product.inStock
-                      ? 'bg-green-500/90 text-white'
-                      : 'bg-red-500/90 text-white'
+                    ? 'bg-green-500/90 text-white'
+                    : 'bg-red-500/90 text-white'
                     }`}
                 >
                   {product.inStock ? 'In Stock' : 'Sold Out'}
@@ -168,7 +171,7 @@ export default function MenuManagement() {
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg">{product.name}</h3>
                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">{product.category}</span>
                 </div>
-                <p className="font-black text-primary text-lg">${product.price.toFixed(2)}</p>
+                <p className="font-black text-primary text-lg">{product.price.toFixed(2)}{currencySymbol}</p>
               </div>
               <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">{product.description}</p>
 
@@ -224,7 +227,7 @@ export default function MenuManagement() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price ($)</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price ({currencySymbol})</label>
                     <input
                       type="number" step="0.01"
                       className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary outline-none"
@@ -284,8 +287,8 @@ export default function MenuManagement() {
                         });
                       }}
                       className={`flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${formData.variantTypes.includes(v._id)
-                          ? 'bg-primary/10 border-primary text-primary'
-                          : 'bg-slate-50 dark:bg-white/5 border-primary/5 text-slate-500'
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'bg-slate-50 dark:bg-white/5 border-primary/5 text-slate-500'
                         }`}
                     >
                       {formData.variantTypes.includes(v._id) ? <Check className="size-4" /> : <Layers className="size-4" />}

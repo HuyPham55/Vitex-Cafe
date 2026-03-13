@@ -7,6 +7,7 @@ const storeSettingsSchema = new mongoose.Schema(
         paymentDescription: { type: String, default: 'Please pay at the counter or scan our QR code.' },
         adminUsername: { type: String, required: true, unique: true },
         adminPasswordHash: { type: String, required: true },
+        currencySymbol: { type: String, default: '₫' },
     },
     { timestamps: true }
 );

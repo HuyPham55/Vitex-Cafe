@@ -12,6 +12,7 @@ export default function VariantManagement() {
     const { token } = useAuth();
     const [variants, setVariants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currencySymbol, setCurrencySymbol] = useState('$');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingVariant, setEditingVariant] = useState<any>(null);
 
@@ -23,8 +24,12 @@ export default function VariantManagement() {
 
     const getVariants = async () => {
         try {
-            const data = await fetchAPI(endpoints.variants);
-            setVariants(data);
+            const [varData, settings] = await Promise.all([
+                fetchAPI(endpoints.variants),
+                fetchAPI(endpoints.settings)
+            ]);
+            setVariants(varData);
+            setCurrencySymbol(settings.currencySymbol || '$');
         } catch (error) {
             console.error('Failed to fetch variants:', error);
         } finally {
@@ -153,7 +158,7 @@ export default function VariantManagement() {
                                 <div key={i} className="px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-primary/5 rounded-lg flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{opt.label}</span>
                                     {opt.priceModifier > 0 && (
-                                        <span className="text-[10px] font-black text-green-600">+$ {opt.priceModifier.toFixed(2)}</span>
+                                        <span className="text-[10px] font-black text-green-600">+{opt.priceModifier.toFixed(2)}{currencySymbol}</span>
                                     )}
                                 </div>
                             ))}
@@ -217,10 +222,10 @@ export default function VariantManagement() {
                                             </div>
                                             <div className="w-32">
                                                 <div className="relative">
-                                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
+                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">{currencySymbol}</span>
                                                     <input
                                                         type="number" step="0.01"
-                                                        className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl pl-8 pr-3 py-3 text-sm focus:ring-1 focus:ring-primary outline-none font-bold"
+                                                        className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl pl-3 pr-8 py-3 text-sm focus:ring-1 focus:ring-primary outline-none font-bold"
                                                         value={opt.priceModifier}
                                                         onChange={e => updateOption(i, 'priceModifier', parseFloat(e.target.value))}
                                                         required

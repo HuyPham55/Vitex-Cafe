@@ -8,13 +8,18 @@ import { fetchAPI, endpoints } from '@/lib/api';
 export default function Menu() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currencySymbol, setCurrencySymbol] = useState('$');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const data = await fetchAPI(endpoints.products);
+        const [data, settings] = await Promise.all([
+          fetchAPI(endpoints.products),
+          fetchAPI(endpoints.settings)
+        ]);
         setProducts(data);
+        setCurrencySymbol(settings.currencySymbol || '$');
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {
@@ -103,7 +108,7 @@ export default function Menu() {
                         <div className="px-4 py-2">
                           <div className="flex justify-between items-start mb-1">
                             <p className="text-slate-900 dark:text-slate-100 text-base font-bold">{product.name}</p>
-                            <p className="text-primary font-bold">${product.price.toFixed(2)}</p>
+                            <p className="text-primary font-bold">{product.price.toFixed(2)}{currencySymbol}</p>
                           </div>
                           <p className="text-slate-500 dark:text-slate-400 text-sm font-normal line-clamp-2">{product.description}</p>
                         </div>

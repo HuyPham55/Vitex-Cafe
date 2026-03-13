@@ -17,7 +17,8 @@ export default function StoreSettings() {
     const [formData, setFormData] = useState({
         openTime: '08:00',
         closeTime: '22:00',
-        paymentDescription: ''
+        paymentDescription: '',
+        currencySymbol: '$'
     });
 
     const getSettings = async () => {
@@ -26,7 +27,8 @@ export default function StoreSettings() {
             setFormData({
                 openTime: data.openTime || '08:00',
                 closeTime: data.closeTime || '22:00',
-                paymentDescription: data.paymentDescription || ''
+                paymentDescription: data.paymentDescription || '',
+                currencySymbol: data.currencySymbol || '$'
             });
         } catch (error) {
             console.error('Failed to fetch settings:', error);
@@ -131,6 +133,29 @@ export default function StoreSettings() {
                             required
                         ></textarea>
                         <p className="text-xs text-slate-400 mt-2 italic">This description will be shown to customers after they place an order.</p>
+                    </div>
+                </div>
+
+                {/* Regional Settings */}
+                <div className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8 border-b border-primary/5 pb-4">
+                        <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-lg">
+                            <Settings className="size-5" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Regional Settings</h3>
+                    </div>
+
+                    <div className="max-w-xs">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Currency Symbol</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. ₫, $, €"
+                            className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-4 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary transition-all font-bold text-center text-xl"
+                            value={formData.currencySymbol}
+                            onChange={e => setFormData({ ...formData, currencySymbol: e.target.value })}
+                            required
+                        />
+                        <p className="text-[10px] text-slate-400 mt-2">Display symbol for all product prices.</p>
                     </div>
                 </div>
 

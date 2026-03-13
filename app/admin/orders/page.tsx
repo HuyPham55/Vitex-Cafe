@@ -12,14 +12,19 @@ export default function OrderManagement() {
     const { token } = useAuth();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currencySymbol, setCurrencySymbol] = useState('$');
     const [filterStatus, setFilterStatus] = useState('all');
 
     const getOrders = async () => {
         try {
-            const data = await fetchAPI(endpoints.orders, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setOrders(data);
+            const [orderData, settings] = await Promise.all([
+                fetchAPI(endpoints.orders, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }),
+                fetchAPI(endpoints.settings)
+            ]);
+            setOrders(orderData);
+            setCurrencySymbol(settings.currencySymbol || '$');
         } catch (error) {
             console.error('Failed to fetch orders:', error);
         } finally {
@@ -161,7 +166,7 @@ export default function OrderManagement() {
                             </div>
 
                             <div className="text-right">
-                                <p className="text-2xl font-black text-slate-900 dark:text-slate-100">${order.total.toFixed(2)}</p>
+                                <p className="text-2xl font-black text-slate-900 dark:text-slate-100">{order.total.toFixed(2)}{currencySymbol}</p>
                                 <div className="flex justify-end gap-2 mt-2">
                                     {order.status === 'pending' && (
                                         <button onClick={() => updateStatus(order._id, 'preparing')} className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">Brew</button>

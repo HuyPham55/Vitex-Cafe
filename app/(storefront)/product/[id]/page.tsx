@@ -17,6 +17,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const [product, setProduct] = useState<any>(null);
     const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currencySymbol, setCurrencySymbol] = useState('$');
     const [quantity, setQuantity] = useState(1);
     const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>({});
     const [customerName, setCustomerName] = useState('');
@@ -32,12 +33,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     useEffect(() => {
         const getData = async () => {
             try {
-                const [prodData, reviewsData] = await Promise.all([
+                const [prodData, reviewsData, settings] = await Promise.all([
                     fetchAPI(`${endpoints.products}/${id}`),
-                    fetchAPI(`${endpoints.reviews}/${id}`)
+                    fetchAPI(`${endpoints.reviews}/${id}`),
+                    fetchAPI(endpoints.settings)
                 ]);
                 setProduct(prodData);
                 setReviews(reviewsData);
+                setCurrencySymbol(settings.currencySymbol || '$');
 
                 // Initialize default variants
                 const defaults: Record<string, any> = {};
@@ -189,7 +192,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                         <div>
                             <div className="flex justify-between items-start mb-2">
                                 <h1 className="text-slate-900 dark:text-slate-100 text-3xl md:text-4xl font-black tracking-tight">{product.name}</h1>
-                                <p className="text-primary text-2xl font-bold">${product.price.toFixed(2)}</p>
+                                <p className="text-primary text-2xl font-bold">{product.price.toFixed(2)}{currencySymbol}</p>
                             </div>
                             <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed">
                                 {product.description}
@@ -230,7 +233,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                                 onChange={() => handleVariantChange(vt.name, option)}
                                             />
                                             <div className="text-center py-3 px-2 rounded-xl border border-primary/20 text-slate-600 dark:text-slate-400 font-medium peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all text-sm">
-                                                {option.label} {option.priceModifier > 0 && <span className="text-[10px] opacity-80 block">+${option.priceModifier.toFixed(2)}</span>}
+                                                {option.label} {option.priceModifier > 0 && <span className="text-[10px] opacity-80 block">+{option.priceModifier.toFixed(2)}{currencySymbol}</span>}
                                             </div>
                                         </label>
                                     ))}
@@ -281,7 +284,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                 className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl py-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors disabled:opacity-50"
                             >
                                 {isSubmittingOrder ? <Loader2 className="animate-spin size-5" /> : <ShoppingCart className="size-5" />}
-                                {product.inStock ? `Add to Order - $${totalPrice.toFixed(2)}` : 'Out of Stock'}
+                                {product.inStock ? `Add to Order - ${totalPrice.toFixed(2)}{currencySymbol}` : 'Out of Stock'}
                             </button>
                         </div>
                     </div>

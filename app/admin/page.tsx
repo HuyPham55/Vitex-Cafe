@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const { token } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currencySymbol, setCurrencySymbol] = useState('$');
   const [stats, setStats] = useState({
     revenue: 0,
     totalOrders: 0,
@@ -22,10 +23,15 @@ export default function AdminDashboard() {
 
   const getDashboardData = async () => {
     try {
-      const data = await fetchAPI(endpoints.orders, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setOrders(data);
+      const [orderData, settings] = await Promise.all([
+        fetchAPI(endpoints.orders, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        fetchAPI(endpoints.settings)
+      ]);
+      setOrders(orderData);
+      setCurrencySymbol(settings.currencySymbol || '$');
+      const data = orderData;
 
       // Calculate simple stats
       const today = new Date().toLocaleDateString();
@@ -104,7 +110,7 @@ export default function AdminDashboard() {
             <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">Today</span>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Today's Revenue</p>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">${stats.revenue.toFixed(2)}</h3>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">{stats.revenue.toFixed(2)}{currencySymbol}</h3>
         </div>
 
         <div className="bg-white dark:bg-background-dark/50 border border-primary/10 rounded-xl p-6 shadow-sm">

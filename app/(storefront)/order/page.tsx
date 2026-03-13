@@ -163,7 +163,7 @@ function OrderStatusContent() {
                       </p>
                     </div>
                   </div>
-                  <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">${(item.subtotal || 0).toFixed(2)}</p>
+                  <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{(item.subtotal || 0).toFixed(2)}{settings?.currencySymbol || '$'}</p>
                 </div>
               ))}
             </div>
@@ -171,7 +171,7 @@ function OrderStatusContent() {
             <div className="mt-6 pt-4 border-t border-primary/10 flex flex-col gap-2">
               <div className="flex justify-between text-lg font-black text-slate-900 dark:text-slate-100">
                 <span>Total</span>
-                <span>${order.total.toFixed(2)}</span>
+                <span>{order.total.toFixed(2)}{settings?.currencySymbol || '$'}</span>
               </div>
               <div className="flex items-center gap-2 mt-2">
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'

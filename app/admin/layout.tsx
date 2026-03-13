@@ -11,34 +11,32 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, username, logout } = useAuth();
+  const { isAuthenticated, isLoading, username, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (pathname === '/admin/login') {
-      setChecking(false);
-      return;
-    }
+    if (pathname === '/admin/login') return;
 
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/admin/login');
-    } else {
-      setChecking(false);
     }
-  }, [isAuthenticated, pathname, router]);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  if (checking) {
+  if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50 dark:bg-background-dark">
         <Loader2 className="animate-spin size-12 text-primary" />
       </div>
     );
+  }
+
+  if (!isAuthenticated && pathname !== '/admin/login') {
+    return null; // or a smaller loader
   }
 
   return (

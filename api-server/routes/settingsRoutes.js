@@ -6,6 +6,9 @@ const { upload } = require('../controllers/reviewController');
 
 router.route('/')
     .get(getSettings)
-    .put(protect, upload.array('newHeroImages', 5), updateSettings);
+    .put(protect, upload.fields([
+        { name: 'newHeroImages', maxCount: 5 },
+        { name: 'newGalleryImages', maxCount: 10 }
+    ]), updateSettings);
 
 module.exports = router;

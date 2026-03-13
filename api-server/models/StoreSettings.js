@@ -8,6 +8,7 @@ const storeSettingsSchema = new mongoose.Schema(
         adminUsername: { type: String, required: true, unique: true },
         adminPasswordHash: { type: String, required: true },
         heroImages: { type: [String], default: [] },
+        galleryImages: { type: [String], default: [] },
     },
     { timestamps: true }
 );

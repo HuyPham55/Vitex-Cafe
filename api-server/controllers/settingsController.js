@@ -26,12 +26,22 @@ const getSettings = async (req, res) => {
             }
 
             // Handle hero images
-            let existingImages = req.body.existingHeroImages || [];
-            if (typeof existingImages === 'string') {
-                existingImages = [existingImages];
+            let existingHeroImages = req.body.existingHeroImages || [];
+            if (typeof existingHeroImages === 'string') {
+                existingHeroImages = [existingHeroImages];
             }
-            const newImages = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
-            settings.heroImages = [...existingImages, ...newImages];
+            const heroFiles = req.files?.newHeroImages || [];
+            const newHeroImages = heroFiles.map(file => `/uploads/${file.filename}`);
+            settings.heroImages = [...existingHeroImages, ...newHeroImages];
+
+            // Handle gallery images
+            let existingGalleryImages = req.body.existingGalleryImages || [];
+            if (typeof existingGalleryImages === 'string') {
+                existingGalleryImages = [existingGalleryImages];
+            }
+            const galleryFiles = req.files?.newGalleryImages || [];
+            const newGalleryImages = galleryFiles.map(file => `/uploads/${file.filename}`);
+            settings.galleryImages = [...existingGalleryImages, ...newGalleryImages];
 
             const savedSettings = await settings.save();
             res.json(savedSettings);

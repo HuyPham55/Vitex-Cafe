@@ -1,4 +1,4 @@
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import { Work_Sans } from 'next/font/google';
 import './globals.css'; // Global styles
 
@@ -12,10 +12,20 @@ export const metadata: Metadata = {
   description: 'Experience the Perfect Brew',
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+import { AuthProvider } from '@/context/AuthContext';
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className={workSans.variable}>
-      <body className="min-h-screen flex flex-col" suppressHydrationWarning>{children}</body>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${workSans.variable} font-sans antialiased`}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

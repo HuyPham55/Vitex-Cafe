@@ -1,15 +1,58 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MenuSquare, Coffee, CheckCircle, ArrowRight } from 'lucide-react';
+import { fetchAPI, endpoints } from '@/lib/api';
 
 export default function Home() {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getOrders = async () => {
+      try {
+        const data = await fetchAPI(`${endpoints.orders}/active?status=pending,preparing,ready`);
+        // Map pending/preparing/ready to display
+        setOrders(data.slice(0, 6)); // Show latest 6
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getOrders();
+    const interval = setInterval(getOrders, 10000); // Polling every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-blue-500';
+      case 'preparing': return 'bg-orange-500 animate-pulse';
+      case 'ready': return 'bg-green-500';
+      default: return 'bg-slate-400';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Just ordered';
+      case 'preparing': return 'Brewing';
+      case 'ready': return 'Ready for Pickup';
+      default: return status;
+    }
+  };
+
   return (
     <div className="flex flex-col items-center w-full">
       <div className="w-full max-w-[1200px] px-4 md:px-10 py-6">
         {/* Hero Section */}
         <section className="@container">
           <div className="@[480px]:p-2">
-            <div 
-              className="flex min-h-[520px] flex-col gap-8 bg-cover bg-center bg-no-repeat @[480px]:rounded-xl items-center justify-center p-6 text-center relative overflow-hidden" 
+            <div
+              className="flex min-h-[520px] flex-col gap-8 bg-cover bg-center bg-no-repeat @[480px]:rounded-xl items-center justify-center p-6 text-center relative overflow-hidden"
               style={{ backgroundImage: 'linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBBS7MjMdfwCv1DqRLY5YHgD8XRyOsNHseJidVw67eg4s0rItgSTVEKs1YsCAoYPyzO4MsnykLv1Ktwepj6z-pXsx_F_gUztpAA9g2Jvle5oLF0RFSZD34YrTM3DrJdyFgwySZi28siaqS1kU72N9J-htErWvr_U7hWpIGhcY8BZqUHsY2FO8_8nSG44ZdLan2A0HmsJbQUQwIE0a5P8i9K9MdnetqR7OQKCkxIQf58JdmiReEQBGc7z6l4AzRtOIqi9hUKPgwX")' }}
             >
               <div className="flex flex-col gap-4 max-w-2xl z-10">
@@ -47,63 +90,46 @@ export default function Home() {
               Live Updates
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2">
-            {/* Order Card 1 */}
-            <div className="flex items-center gap-4 bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
-                <Coffee className="size-8" />
-              </div>
-              <div className="flex flex-col flex-1">
-                <div className="flex justify-between items-start">
-                  <p className="text-slate-900 dark:text-slate-100 text-lg font-bold">John D.</p>
-                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">#402</span>
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Caramel Macchiato</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                  <p className="text-blue-500 text-xs font-bold uppercase">Just ordered</p>
-                </div>
-              </div>
+
+          {loading ? (
+            <div className="flex justify-center p-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-            {/* Order Card 2 */}
-            <div className="flex items-center gap-4 bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
-                <Coffee className="size-8" />
-              </div>
-              <div className="flex flex-col flex-1">
-                <div className="flex justify-between items-start">
-                  <p className="text-slate-900 dark:text-slate-100 text-lg font-bold">Sarah M.</p>
-                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">#401</span>
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Cold Brew w/ Oat Milk</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse"></div>
-                  <p className="text-orange-500 text-xs font-bold uppercase">Brewing</p>
-                </div>
-              </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center p-12 bg-white dark:bg-background-dark/50 rounded-xl border border-primary/10 text-slate-500">
+              No active orders at the moment. Be the first to order!
             </div>
-            {/* Order Card 3 */}
-            <div className="flex items-center gap-4 bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
-                <CheckCircle className="size-8" />
-              </div>
-              <div className="flex flex-col flex-1">
-                <div className="flex justify-between items-start">
-                  <p className="text-slate-900 dark:text-slate-100 text-lg font-bold">Michael R.</p>
-                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">#400</span>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2">
+              {orders.map((order) => (
+                <div key={order._id} className="flex items-center gap-4 bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
+                    {order.status === 'ready' ? <CheckCircle className="size-8" /> : <Coffee className="size-8" />}
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <div className="flex justify-between items-start">
+                      <p className="text-slate-900 dark:text-slate-100 text-lg font-bold">{order.customerName}</p>
+                      <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">#{order.orderNumber}</span>
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium truncate">
+                      {order.items.map((i: any) => i.name).join(', ')}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className={`h-1.5 w-1.5 rounded-full ${getStatusColor(order.status)}`}></div>
+                      <p className={`${getStatusColor(order.status).replace('bg-', 'text-')} text-xs font-bold uppercase`}>
+                        {getStatusText(order.status)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Double Espresso</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-                  <p className="text-green-500 text-xs font-bold uppercase">Ready for Pickup</p>
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
+          )}
+
           <div className="mt-8 flex justify-center">
-            <button className="text-primary font-bold text-sm flex items-center gap-2 hover:gap-3 transition-all">
-              View All Recent Orders <ArrowRight className="size-4" />
-            </button>
+            <Link href="/menu" className="text-primary font-bold text-sm flex items-center gap-2 hover:gap-3 transition-all">
+              Order Yours Now <ArrowRight className="size-4" />
+            </Link>
           </div>
         </section>
 

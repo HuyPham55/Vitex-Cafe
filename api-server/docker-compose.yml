@@ -27,12 +27,15 @@ services:
       - .:/usr/src/app
       # Anonymous volume so the host's node_modules don't overwrite the container's
       - /usr/src/app/node_modules
+      # Persist uploads
+      - ./uploads:/usr/src/app/uploads
     networks:
       - vitex_cafe_net
 
 volumes:
   # Named volume for database persistence
   mongodb_data:
+
 
 networks:
   vitex_cafe_net:

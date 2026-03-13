@@ -5,8 +5,22 @@ const Product = require('../models/Product');
 // @access  Public
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find().populate('variantTypes');
         res.json(products);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+// @desc    Get product by ID
+// @route   GET /api/products/:id
+// @access  Public
+const getProductById = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id).populate('variantTypes');
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json(product);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -15,12 +29,40 @@ const getProducts = async (req, res) => {
 
 // @desc    Add a product
 // @route   POST /api/products
-// @access  Private
+// @access  Private/Admin
 const addProduct = async (req, res) => {
     try {
         const newProduct = new Product(req.body);
         const product = await newProduct.save();
+        res.status(201).json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+// @desc    Update a product
+// @route   PUT /api/products/:id
+// @access  Private/Admin
+const updateProduct = async (req, res) => {
+    try {
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
         res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+// @desc    Delete a product
+// @route   DELETE /api/products/:id
+// @access  Private/Admin
+const deleteProduct = async (req, res) => {
+    try {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ message: 'Product removed' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -29,5 +71,8 @@ const addProduct = async (req, res) => {
 
 module.exports = {
     getProducts,
+    getProductById,
     addProduct,
+    updateProduct,
+    deleteProduct,
 };

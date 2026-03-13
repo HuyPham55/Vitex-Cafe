@@ -26,6 +26,12 @@ const productSchema = new mongoose.Schema(
         imageUrl: {
             type: String,
         },
+        variantTypes: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'VariantType',
+            },
+        ],
     },
     { timestamps: true }
 );

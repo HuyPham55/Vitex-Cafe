@@ -16,16 +16,35 @@ const getSettings = async (req, res) => {
 // @desc    Update store settings
 // @route   PUT /api/settings
 // @access  Private/Admin
-const updateSettings = async (req, res) => {
-    try {
-        let settings = await StoreSettings.findOne();
-        if (!settings) {
-            settings = new StoreSettings(req.body);
-        } else {
-            Object.assign(settings, req.body);
-        }
-        const savedSettings = await settings.save();
-        res.json(savedSettings);
+    const updateSettings = async (req, res) => {
+        try {
+            let settings = await StoreSettings.findOne();
+            if (!settings) {
+                settings = new StoreSettings(req.body);
+            } else {
+                Object.assign(settings, req.body);
+            }
+
+            // Handle hero images
+            let existingHeroImages = req.body.existingHeroImages || [];
+            if (typeof existingHeroImages === 'string') {
+                existingHeroImages = [existingHeroImages];
+            }
+            const heroFiles = req.files?.newHeroImages || [];
+            const newHeroImages = heroFiles.map(file => `/uploads/${file.filename}`);
+            settings.heroImages = [...existingHeroImages, ...newHeroImages];
+
+            // Handle gallery images
+            let existingGalleryImages = req.body.existingGalleryImages || [];
+            if (typeof existingGalleryImages === 'string') {
+                existingGalleryImages = [existingGalleryImages];
+            }
+            const galleryFiles = req.files?.newGalleryImages || [];
+            const newGalleryImages = galleryFiles.map(file => `/uploads/${file.filename}`);
+            settings.galleryImages = [...existingGalleryImages, ...newGalleryImages];
+
+            const savedSettings = await settings.save();
+            res.json(savedSettings);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

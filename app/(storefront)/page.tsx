@@ -2,12 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MenuSquare, Coffee, CheckCircle, ArrowRight } from 'lucide-react';
+import { MenuSquare, Coffee, CheckCircle, ArrowRight, X } from 'lucide-react';
 import { fetchAPI, endpoints } from '@/lib/api';
 
 export default function Home() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heroImages, setHeroImages] = useState<string[]>([
+    'https://lh3.googleusercontent.com/aida-public/AB6AXuBBS7MjMdfwCv1DqRLY5YHgD8XRyOsNHseJidVw67eg4s0rItgSTVEKs1YsCAoYPyzO4MsnykLv1Ktwepj6z-pXsx_F_gUztpAA9g2Jvle5oLF0RFSZD34YrTM3DrJdyFgwySZi28siaqS1kU72N9J-htErWvr_U7hWpIGhcY8BZqUHsY2FO8_8nSG44ZdLan2A0HmsJbQUQwIE0a5P8i9K9MdnetqR7OQKCkxIQf58JdmiReEQBGc7z6l4AzRtOIqi9hUKPgwX'
+  ]);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const getOrders = async () => {
@@ -21,11 +27,33 @@ export default function Home() {
         setLoading(false);
       }
     };
+    const getSettings = async () => {
+      try {
+        const data = await fetchAPI(endpoints.settings);
+        if (data.heroImages && data.heroImages.length > 0) {
+          setHeroImages(data.heroImages);
+        }
+        if (data.galleryImages && data.galleryImages.length > 0) {
+          setGalleryImages(data.galleryImages);
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
 
     getOrders();
+    getSettings();
     const interval = setInterval(getOrders, 10000); // Polling every 10s
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroImages.length);
+    }, 5000); // Autoplay every 5 seconds
+    return () => clearInterval(timer);
+  }, [heroImages]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -52,9 +80,16 @@ export default function Home() {
         <section className="@container">
           <div className="@[480px]:p-2">
             <div
-              className="flex min-h-[520px] flex-col gap-8 bg-cover bg-center bg-no-repeat @[480px]:rounded-xl items-center justify-center p-6 text-center relative overflow-hidden"
-              style={{ backgroundImage: 'linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBBS7MjMdfwCv1DqRLY5YHgD8XRyOsNHseJidVw67eg4s0rItgSTVEKs1YsCAoYPyzO4MsnykLv1Ktwepj6z-pXsx_F_gUztpAA9g2Jvle5oLF0RFSZD34YrTM3DrJdyFgwySZi28siaqS1kU72N9J-htErWvr_U7hWpIGhcY8BZqUHsY2FO8_8nSG44ZdLan2A0HmsJbQUQwIE0a5P8i9K9MdnetqR7OQKCkxIQf58JdmiReEQBGc7z6l4AzRtOIqi9hUKPgwX")' }}
+              className="flex min-h-[520px] flex-col gap-8 @[480px]:rounded-xl items-center justify-center p-6 text-center relative overflow-hidden"
             >
+              {heroImages.map((img, i) => (
+                <div 
+                  key={i} 
+                  className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${i === currentSlide ? 'opacity-100' : 'opacity-0'}`} 
+                  style={{ backgroundImage: `linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("${img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`}")` }}
+                />
+              ))}
+
               <div className="flex flex-col gap-4 max-w-2xl z-10">
                 <h1 className="text-white text-5xl font-black leading-tight tracking-tight @[480px]:text-6xl">
                   Experience the <span className="text-primary">Perfect Brew</span>
@@ -133,6 +168,39 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Gallery Section */}
+        {galleryImages.length > 0 && (
+          <section className="mb-20">
+            <div className="flex flex-col gap-2 mb-8 px-4 text-center md:text-left">
+              <div className="flex items-center gap-3 justify-center md:justify-start">
+                <MenuSquare className="text-primary size-8" />
+                <h2 className="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">Our Daily Brews</h2>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-2xl">
+                A glimpse into our daily craft, from the perfect latte art to our cozy roasting corner. Every shot tells a story.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-2">
+              {galleryImages.map((img, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => setSelectedImage(img)}
+                  className="aspect-square overflow-hidden rounded-2xl group relative cursor-pointer shadow-sm border border-primary/5"
+                >
+                  <img 
+                    alt="Cafe Gallery" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                    src={img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`} 
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                    <span className="text-white text-xs font-medium uppercase tracking-widest">Vitex Moment</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* CTA Section */}
         <section className="bg-primary/5 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-primary/10">
           <div className="max-w-xl text-center md:text-left">
@@ -144,6 +212,35 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:text-primary transition-colors p-2 bg-white/10 rounded-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedImage(null);
+            }}
+          >
+            <X size={32} />
+          </button>
+          
+          <div 
+            className="relative max-w-5xl w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={selectedImage.startsWith('http') ? selectedImage : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${selectedImage}`} 
+              alt="Gallery Preview" 
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

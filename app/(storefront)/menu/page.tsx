@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Coffee, IceCream, Search } from 'lucide-react';
 import { fetchAPI, endpoints } from '@/lib/api';
@@ -10,6 +10,29 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [currencySymbol, setCurrencySymbol] = useState('$');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const smoothScrollTo = useCallback((id: string) => {
+    setActiveCategory(id);
+    // We wait a brief moment for the Framer Motion template animation (y: 15 -> 0)
+    // to settle, otherwise getBoundingClientRect will be inaccurate.
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      
+      const STICKY_HEADER_OFFSET = 140; 
+      const top = el.getBoundingClientRect().top + window.scrollY - STICKY_HEADER_OFFSET;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }, 100);
+  }, []);
+
+  // Handle initial hash in URL on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash && !loading) {
+      const id = window.location.hash.replace('#', '');
+      smoothScrollTo(id);
+    }
+  }, [loading, smoothScrollTo]);
 
   useEffect(() => {
     const getProducts = async () => {
@@ -51,14 +74,32 @@ export default function Menu() {
         <div className="sticky top-[73px] bg-white/90 dark:bg-background-dark/90 backdrop-blur z-40 pb-3 -mx-4 px-4 md:mx-0 md:px-0">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-primary/10">
             <div className="flex overflow-x-auto no-scrollbar">
-              <a href="#" className="flex flex-col items-center justify-center border-b-[3px] border-primary text-primary pb-3 pt-4 px-4 whitespace-nowrap">
+              <button
+                onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setActiveCategory(null); }}
+                className={`flex flex-col items-center justify-center border-b-[3px] pb-3 pt-4 px-4 whitespace-nowrap transition-colors ${
+                  activeCategory === null
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-primary'
+                }`}
+              >
                 <p className="text-sm font-bold tracking-wide">All Items</p>
-              </a>
-              {categories.map((cat) => (
-                <a key={cat} href={`#${cat.toLowerCase().replace(/\s+/g, '-')}`} className="flex flex-col items-center justify-center border-b-[3px] border-transparent text-slate-500 dark:text-slate-400 pb-3 pt-4 px-4 whitespace-nowrap hover:text-primary transition-colors">
-                  <p className="text-sm font-bold tracking-wide">{cat}</p>
-                </a>
-              ))}
+              </button>
+              {categories.map((cat) => {
+                const id = cat.toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => smoothScrollTo(id)}
+                    className={`flex flex-col items-center justify-center border-b-[3px] pb-3 pt-4 px-4 whitespace-nowrap transition-colors ${
+                      activeCategory === id
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-primary'
+                    }`}
+                  >
+                    <p className="text-sm font-bold tracking-wide">{cat}</p>
+                  </button>
+                );
+              })}
             </div>
             <div className="relative mb-3 md:mb-0 md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4" />

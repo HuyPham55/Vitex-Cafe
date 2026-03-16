@@ -92,7 +92,7 @@ export default function AsmrPage() {
             {/* Video Player */}
             <video 
               key={activeVideo.videoUrl} 
-              src={`http://localhost:5000${activeVideo.videoUrl}`}
+              src={activeVideo.videoUrl.startsWith('http') ? activeVideo.videoUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${activeVideo.videoUrl}`}
               className="absolute inset-0 w-full h-full object-cover"
               controls
               autoPlay

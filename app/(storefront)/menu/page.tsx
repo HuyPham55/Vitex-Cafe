@@ -103,7 +103,7 @@ export default function Menu() {
                         )}
                         <div
                           className="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover transition-transform group-hover:scale-105"
-                          style={{ backgroundImage: `url("${product.imageUrl || 'https://picsum.photos/400/300'}")` }}
+                          style={{ backgroundImage: `url("${product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${product.imageUrl}`) : 'https://picsum.photos/400/300'}")` }}
                         ></div>
                         <div className="px-4 py-2">
                           <div className="flex justify-between items-start mb-1">

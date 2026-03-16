@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const { put } = require('@vercel/blob');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -35,7 +36,10 @@ const addProduct = async (req, res) => {
         let productData = { ...req.body };
         
         if (req.file) {
-            productData.imageUrl = `/uploads/${req.file.filename}`;
+            const blob = await put(req.file.originalname, req.file.buffer, {
+                access: 'public',
+            });
+            productData.imageUrl = blob.url;
         }
 
         // Parse variantTypes if sent as string (common with FormData)
@@ -65,7 +69,10 @@ const updateProduct = async (req, res) => {
         let productData = { ...req.body };
 
         if (req.file) {
-            productData.imageUrl = `/uploads/${req.file.filename}`;
+            const blob = await put(req.file.originalname, req.file.buffer, {
+                access: 'public',
+            });
+            productData.imageUrl = blob.url;
         }
 
         // Parse variantTypes if sent as string

@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getReviews, createReview, upload } = require('../controllers/reviewController');
+const { getReviews, createReview } = require('../controllers/reviewController');
+const { imageUpload } = require('../middleware/uploadMiddleware');
 
 router.get('/:productId', getReviews);
-router.post('/', upload.array('photos', 5), createReview);
+router.post('/', imageUpload.array('photos', 5), createReview);
 
 module.exports = router;

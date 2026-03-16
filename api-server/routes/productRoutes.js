@@ -8,16 +8,16 @@ const {
     deleteProduct,
 } = require('../controllers/productController');
 const { protect } = require('../middleware/authMiddleware');
-const { upload } = require('../controllers/reviewController');
+const { imageUpload } = require('../middleware/uploadMiddleware');
 
 // Routes
 router.route('/')
     .get(getProducts)
-    .post(protect, upload.single('image'), addProduct);
+    .post(protect, imageUpload.single('image'), addProduct);
 
 router.route('/:id')
     .get(getProductById)
-    .put(protect, upload.single('image'), updateProduct)
+    .put(protect, imageUpload.single('image'), updateProduct)
     .delete(protect, deleteProduct);
 
 module.exports = router;

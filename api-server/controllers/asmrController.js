@@ -1,4 +1,5 @@
 const AsmrVideo = require('../models/AsmrVideo');
+const { put } = require('@vercel/blob');
 
 // @desc    Get all ASMR videos
 // @route   GET /api/asmr
@@ -37,7 +38,10 @@ const addAsmrVideo = async (req, res) => {
             return res.status(400).json({ message: 'Please upload a video file' });
         }
 
-        const videoUrl = `/uploads/${req.file.filename}`;
+        const blob = await put(req.file.originalname, req.file.buffer, {
+            access: 'public',
+        });
+        const videoUrl = blob.url;
 
         const newVideo = new AsmrVideo({
             title,
@@ -64,7 +68,10 @@ const updateAsmrVideo = async (req, res) => {
         let updateData = { title, description, order, isVisible };
 
         if (req.file) {
-            updateData.videoUrl = `/uploads/${req.file.filename}`;
+            const blob = await put(req.file.originalname, req.file.buffer, {
+                access: 'public',
+            });
+            updateData.videoUrl = blob.url;
         }
 
         const video = await AsmrVideo.findByIdAndUpdate(req.params.id, updateData, { new: true });

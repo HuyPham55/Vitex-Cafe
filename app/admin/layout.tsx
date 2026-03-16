@@ -65,6 +65,10 @@ export default function AdminLayout({
             <History className="size-5" />
             <span>Order Management</span>
           </Link>
+          <Link href="/admin/asmr" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${pathname === '/admin/asmr' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary'}`}>
+            <Coffee className="size-5" />
+            <span>ASMR Management</span>
+          </Link>
           <Link href="/admin/settings" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${pathname === '/admin/settings' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary'}`}>
             <Settings className="size-5" />
             <span>Settings</span>

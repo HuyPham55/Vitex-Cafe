@@ -96,7 +96,6 @@ export default function AsmrPage() {
               className="absolute inset-0 w-full h-full object-cover"
               controls
               autoPlay
-              muted
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent pointer-events-none"></div>
             

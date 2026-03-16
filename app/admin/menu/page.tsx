@@ -16,6 +16,8 @@ export default function MenuManagement() {
   const [currencySymbol, setCurrencySymbol] = useState('$');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -73,29 +75,53 @@ export default function MenuManagement() {
         variantTypes: []
       });
     }
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setUploading(true);
     try {
       const url = editingProduct
-        ? `${endpoints.products}/${editingProduct._id}`
-        : endpoints.products;
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${endpoints.products}/${editingProduct._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${endpoints.products}`;
+      
       const method = editingProduct ? 'PUT' : 'POST';
 
-      await fetchAPI(url, {
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('description', formData.description);
+      data.append('price', formData.price.toString());
+      data.append('category', formData.category);
+      data.append('inStock', formData.inStock.toString());
+      data.append('variantTypes', JSON.stringify(formData.variantTypes));
+      
+      if (imageFile) {
+        data.append('image', imageFile);
+      } else {
+        data.append('imageUrl', formData.imageUrl);
+      }
+
+      const response = await fetch(url, {
         method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify(formData)
+        headers: { 
+          'Authorization': `Bearer ${token}` 
+        },
+        body: data
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save product');
+      }
+
       setIsModalOpen(false);
       getData();
     } catch (error: any) {
       alert(error.message || 'Failed to save product');
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -152,7 +178,11 @@ export default function MenuManagement() {
         {products.map((product) => (
           <div key={product._id} className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl overflow-hidden shadow-sm flex flex-col group">
             <div className="relative aspect-[4/3] overflow-hidden">
-              <img src={product.imageUrl || 'https://picsum.photos/400/300'} alt={product.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <img 
+                src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${product.imageUrl}`) : 'https://picsum.photos/400/300'} 
+                alt={product.name} 
+                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+              />
               <div className="absolute top-3 right-3 flex gap-2">
                 <button
                   onClick={() => toggleStock(product)}
@@ -250,13 +280,54 @@ export default function MenuManagement() {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Image URL</label>
-                    <input
-                      type="text"
-                      className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary outline-none"
-                      value={formData.imageUrl}
-                      onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                    />
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Product Image</label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4">
+                        {imageFile ? (
+                          <div className="relative size-16 rounded-lg overflow-hidden border border-primary/20 bg-slate-100">
+                             <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover" />
+                             <button type="button" onClick={() => setImageFile(null)} className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl-lg">
+                               <X className="size-3" />
+                             </button>
+                          </div>
+                        ) : formData.imageUrl ? (
+                          <div className="size-16 rounded-lg overflow-hidden border border-primary/20 bg-slate-100">
+                             <img 
+                               src={formData.imageUrl.startsWith('http') ? formData.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${formData.imageUrl}`} 
+                               alt="Current" 
+                               className="w-full h-full object-cover" 
+                             />
+                          </div>
+                        ) : (
+                          <div className="size-16 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                            <Package className="size-6" />
+                          </div>
+                        )}
+                        <label className="flex-1 cursor-pointer">
+                          <div className="bg-slate-50 dark:bg-background-dark border border-dashed border-primary/20 rounded-xl px-4 py-3 text-center text-xs font-bold text-primary hover:bg-primary/5 transition-all">
+                            {imageFile ? 'Change File' : 'Upload Image File'}
+                          </div>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                          />
+                        </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200 dark:border-slate-800"></span></div>
+                        <div className="relative flex justify-center text-[10px] uppercase font-bold"><span className="bg-white dark:bg-slate-900 px-2 text-slate-400 font-black">OR URL</span></div>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Paste Image URL"
+                        className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                        value={formData.imageUrl}
+                        onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
+                        disabled={!!imageFile}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
@@ -308,8 +379,10 @@ export default function MenuManagement() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20"
+                  disabled={uploading}
+                  className="flex-1 py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                 >
+                  {uploading ? <Loader2 className="animate-spin size-5" /> : null}
                   {editingProduct ? 'Save Changes' : 'Add Product'}
                 </button>
               </div>

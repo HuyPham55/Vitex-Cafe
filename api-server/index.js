@@ -19,28 +19,39 @@ const port = process.env.PORT || 5000;
 connectDB();
 
 // Middleware
+// CORS configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()) 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim().replace(/^"(.*)"$/, '$1')) 
     : ['*'];
 
-const corsOptions = {
+app.use(cors({
     origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        // Allow if no origin (mobile/curl), matches allowed list, matches localhost, or allowedOrigins is '*'
+        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*') || origin.includes('localhost')) {
             callback(null, true);
         } else {
+            console.log('CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    optionsSuccessStatus: 204
-};
+    optionsSuccessStatus: 200
+}));
 
-app.use(cors(corsOptions));
-// Explicitly handle all preflight requests
-app.options('*', cors(corsOptions));
+// Robust preflight handler - explicit to avoid any middleware confusion
+app.options('*', (req, res) => {
+    const origin = req.headers.origin;
+    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*') || origin.includes('localhost')) {
+        res.header('Access-Control-Allow-Origin', origin || '*');
+    }
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    return res.sendStatus(200);
+});
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -58,7 +69,12 @@ app.get('/', (req, res) => {
     res.send('Vitex Cafe API is running');
 });
 
-// Start Server
-app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`);
-});
+// Export for Vercel
+module.exports = app;
+
+// Start Server conditionally
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Server is running on port: ${port}`);
+    });
+}

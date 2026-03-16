@@ -32,7 +32,23 @@ const getProductById = async (req, res) => {
 // @access  Private/Admin
 const addProduct = async (req, res) => {
     try {
-        const newProduct = new Product(req.body);
+        let productData = { ...req.body };
+        
+        if (req.file) {
+            productData.imageUrl = `/uploads/${req.file.filename}`;
+        }
+
+        // Parse variantTypes if sent as string (common with FormData)
+        if (typeof productData.variantTypes === 'string') {
+            try {
+                productData.variantTypes = JSON.parse(productData.variantTypes);
+            } catch (e) {
+                // If not JSON, it might be a comma-separated list
+                productData.variantTypes = productData.variantTypes.split(',').filter(id => id.trim());
+            }
+        }
+
+        const newProduct = new Product(productData);
         const product = await newProduct.save();
         res.status(201).json(product);
     } catch (err) {
@@ -46,7 +62,22 @@ const addProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
     try {
-        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        let productData = { ...req.body };
+
+        if (req.file) {
+            productData.imageUrl = `/uploads/${req.file.filename}`;
+        }
+
+        // Parse variantTypes if sent as string
+        if (typeof productData.variantTypes === 'string') {
+            try {
+                productData.variantTypes = JSON.parse(productData.variantTypes);
+            } catch (e) {
+                productData.variantTypes = productData.variantTypes.split(',').filter(id => id.trim());
+            }
+        }
+
+        const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
         if (!product) return res.status(404).json({ message: 'Product not found' });
         res.json(product);
     } catch (err) {

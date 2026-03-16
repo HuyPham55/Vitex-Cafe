@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Play, Heart, Gift, Volume2, Info, ArrowRight } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 import { motion } from 'framer-motion';
 
 interface AsmrVideo {
@@ -92,7 +92,7 @@ export default function AsmrPage() {
             {/* Video Player */}
             <video 
               key={activeVideo.videoUrl} 
-              src={activeVideo.videoUrl.startsWith('http') ? activeVideo.videoUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${activeVideo.videoUrl}`}
+              src={getImageUrl(activeVideo.videoUrl)}
               className="absolute inset-0 w-full h-full object-cover"
               controls
               autoPlay

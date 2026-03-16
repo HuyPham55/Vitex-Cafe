@@ -1,5 +1,12 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+export function getImageUrl(path: string | null | undefined) {
+    if (!path) return 'https://picsum.photos/400/300';
+    if (path.startsWith('http')) return path;
+    const baseUrl = API_URL.replace('/api', '');
+    return `${baseUrl}${path}`;
+}
+
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',

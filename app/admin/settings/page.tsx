@@ -5,7 +5,7 @@ import {
     Settings, Clock, CreditCard, Save,
     Loader2, Check, RefreshCw
 } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function StoreSettings() {
@@ -205,7 +205,7 @@ export default function StoreSettings() {
                         {existingHeroImages.map((photo, i) => (
                             <div key={`exist-${i}`} className="relative h-24 w-32 rounded-lg overflow-hidden border border-primary/20">
                                 <img
-                                    src={photo.startsWith('http') ? photo : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${photo}`}
+                                    src={getImageUrl(photo)}
                                     alt="Hero Preview"
                                     className="w-full h-full object-cover"
                                 />
@@ -251,7 +251,7 @@ export default function StoreSettings() {
                         {existingGalleryImages.map((photo, i) => (
                             <div key={`gal-exist-${i}`} className="relative h-24 w-32 rounded-lg overflow-hidden border border-primary/20">
                                 <img
-                                    src={photo.startsWith('http') ? photo : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${photo}`}
+                                    src={getImageUrl(photo)}
                                     alt="Gallery Preview"
                                     className="w-full h-full object-cover"
                                 />

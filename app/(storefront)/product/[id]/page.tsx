@@ -8,7 +8,7 @@ import {
     FileEdit, ShoppingCart, Star, MessageSquare, Camera,
     Plus, Minus, Check, Loader2, Image as ImageIcon, X
 } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -185,7 +185,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     <div className="flex flex-col gap-6">
                         <div
                             className="w-full aspect-square md:aspect-[4/3] lg:aspect-square bg-cover bg-center rounded-2xl shadow-sm border border-primary/5"
-                            style={{ backgroundImage: `url("${product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${product.imageUrl}`) : 'https://picsum.photos/600/600'}")` }}
+                            style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
                         >
                         </div>
 
@@ -393,7 +393,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                         {review.photos.map((photo: string, i: number) => (
                                             <img
                                                 key={i}
-                                                src={photo.startsWith('http') ? photo : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${photo}`}
+                                                src={getImageUrl(photo)}
                                                 alt="Review"
                                                 className="size-16 rounded-lg object-cover border border-primary/5 cursor-pointer hover:scale-105 transition-transform"
                                             />

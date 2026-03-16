@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MenuSquare, Coffee, CheckCircle, ArrowRight, X } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 
 export default function Home() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -86,7 +86,7 @@ export default function Home() {
                 <div 
                   key={i} 
                   className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${i === currentSlide ? 'opacity-100' : 'opacity-0'}`} 
-                  style={{ backgroundImage: `linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("${img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`}")` }}
+                  style={{ backgroundImage: `linear-gradient(rgba(34, 25, 16, 0.6) 0%, rgba(34, 25, 16, 0.8) 100%), url("${getImageUrl(img)}")` }}
                 />
               ))}
 
@@ -190,7 +190,7 @@ export default function Home() {
                   <img 
                     alt="Cafe Gallery" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                    src={img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`} 
+                    src={getImageUrl(img)} 
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                     <span className="text-white text-xs font-medium uppercase tracking-widest">Vitex Moment</span>
@@ -234,7 +234,7 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             <img 
-              src={selectedImage.startsWith('http') ? selectedImage : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${selectedImage}`} 
+              src={getImageUrl(selectedImage)} 
               alt="Gallery Preview" 
               className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
             />

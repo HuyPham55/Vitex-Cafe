@@ -5,7 +5,7 @@ import {
   Plus, Search, Edit2, Trash2, Coffee,
   Check, X, Loader2, Package, Tag, Layers
 } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function MenuManagement() {
@@ -179,7 +179,7 @@ export default function MenuManagement() {
           <div key={product._id} className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl overflow-hidden shadow-sm flex flex-col group">
             <div className="relative aspect-[4/3] overflow-hidden">
               <img 
-                src={product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${product.imageUrl}`) : 'https://picsum.photos/400/300'} 
+                src={getImageUrl(product.imageUrl)} 
                 alt={product.name} 
                 className="w-full h-full object-cover transition-transform group-hover:scale-105" 
               />
@@ -293,7 +293,7 @@ export default function MenuManagement() {
                         ) : formData.imageUrl ? (
                           <div className="size-16 rounded-lg overflow-hidden border border-primary/20 bg-slate-100">
                              <img 
-                               src={formData.imageUrl.startsWith('http') ? formData.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${formData.imageUrl}`} 
+                               src={getImageUrl(formData.imageUrl)} 
                                alt="Current" 
                                className="w-full h-full object-cover" 
                              />

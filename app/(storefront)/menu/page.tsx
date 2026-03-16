@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Coffee, IceCream, Search } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 
 export default function Menu() {
   const [products, setProducts] = useState<any[]>([]);
@@ -103,7 +103,7 @@ export default function Menu() {
                         )}
                         <div
                           className="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover transition-transform group-hover:scale-105"
-                          style={{ backgroundImage: `url("${product.imageUrl ? (product.imageUrl.startsWith('http') ? product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${product.imageUrl}`) : 'https://picsum.photos/400/300'}")` }}
+                          style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
                         ></div>
                         <div className="px-4 py-2">
                           <div className="flex justify-between items-start mb-1">

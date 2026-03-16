@@ -40,4 +40,5 @@ export const endpoints = {
     reviews: '/reviews',
     settings: '/settings',
     auth: '/auth',
+    asmr: '/asmr',
 };

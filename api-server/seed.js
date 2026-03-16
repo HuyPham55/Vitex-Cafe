@@ -5,6 +5,7 @@ require('dotenv').config();
 const Product = require('./models/Product');
 const VariantType = require('./models/VariantType');
 const StoreSettings = require('./models/StoreSettings');
+const AsmrVideo = require('./models/AsmrVideo');
 
 const seedData = async () => {
     try {
@@ -16,6 +17,7 @@ const seedData = async () => {
         await Product.deleteMany({});
         await VariantType.deleteMany({});
         await StoreSettings.deleteMany({});
+        await AsmrVideo.deleteMany({});
 
         // 1. Create Variant Types
         const variants = await VariantType.insertMany([

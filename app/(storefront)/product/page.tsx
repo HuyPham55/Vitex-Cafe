@@ -144,7 +144,7 @@ export default function Product() {
                 <span className="font-bold text-slate-900 dark:text-slate-100">1</span>
                 <button className="text-primary font-bold text-xl hover:text-primary/70">+</button>
               </div>
-              <Link href="/order" className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl py-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
+              <Link href="/order" className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl p-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
                 <ShoppingCart className="size-5" />
                 Add to Order - $5.50
               </Link>

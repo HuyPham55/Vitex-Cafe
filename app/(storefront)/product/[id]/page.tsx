@@ -190,7 +190,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                         </div>
 
                         <div>
-                            <div className="flex justify-between items-start mb-2">
+                            <div className="flex justify-between items-center mb-2">
                                 <h1 className="text-slate-900 dark:text-slate-100 text-3xl md:text-4xl font-black tracking-tight">{product.name}</h1>
                                 <p className="text-primary text-2xl font-bold">{product.price.toFixed(2)}{currencySymbol}</p>
                             </div>
@@ -281,10 +281,10 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             <button
                                 onClick={handleOrder}
                                 disabled={isSubmittingOrder || !product.inStock}
-                                className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl py-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl p-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors disabled:opacity-50"
                             >
                                 {isSubmittingOrder ? <Loader2 className="animate-spin size-5" /> : <ShoppingCart className="size-5" />}
-                                {product.inStock ? `Add to Order - ${totalPrice.toFixed(2)}{currencySymbol}` : 'Out of Stock'}
+                                {product.inStock ? `Add to Order - ${totalPrice.toFixed(2) + currencySymbol}` : 'Out of Stock'}
                             </button>
                         </div>
                     </div>

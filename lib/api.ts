@@ -1,5 +1,16 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+/**
+ * Formats price using Vietnamese locale (thousand separator .)
+ * Example: 40000 -> 40.000
+ */
+export function formatPrice(price: number | string) {
+    const num = typeof price === 'string' ? parseFloat(price) : price;
+    if (isNaN(num)) return '0';
+    return num.toLocaleString('vi-VN');
+}
+
+
 export function getImageUrl(path: string | null | undefined) {
     if (!path) return 'https://picsum.photos/400/300';
     if (path.startsWith('http')) return path;

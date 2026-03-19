@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Coffee, IceCream, Search } from 'lucide-react';
-import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 
 export default function Menu() {
   const [products, setProducts] = useState<any[]>([]);
@@ -108,7 +108,7 @@ export default function Menu() {
                         <div className="px-4 py-2">
                           <div className="flex justify-between items-start mb-1">
                             <p className="text-slate-900 dark:text-slate-100 text-base font-bold">{product.name}</p>
-                            <p className="text-primary font-bold">{product.price.toFixed(2)}{currencySymbol}</p>
+                            <p className="text-primary font-bold">{formatPrice(product.price)}{currencySymbol}</p>
                           </div>
                           <p className="text-slate-500 dark:text-slate-400 text-sm font-normal line-clamp-2">{product.description}</p>
                         </div>

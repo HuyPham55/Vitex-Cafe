@@ -8,7 +8,7 @@ import {
     FileEdit, ShoppingCart, Star, MessageSquare, Camera,
     Plus, Minus, Check, Loader2, Image as ImageIcon, X
 } from 'lucide-react';
-import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -192,7 +192,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                         <div>
                             <div className="flex justify-between items-center mb-2">
                                 <h1 className="text-slate-900 dark:text-slate-100 text-3xl md:text-4xl font-black tracking-tight">{product.name}</h1>
-                                <p className="text-primary text-2xl font-bold">{product.price.toFixed(2)}{currencySymbol}</p>
+                                <p className="text-primary text-2xl font-bold">{formatPrice(product.price)}{currencySymbol}</p>
                             </div>
                             <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed">
                                 {product.description}
@@ -233,7 +233,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                                 onChange={() => handleVariantChange(vt.name, option)}
                                             />
                                             <div className="text-center py-3 px-2 rounded-xl border border-primary/20 text-slate-600 dark:text-slate-400 font-medium peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all text-sm">
-                                                {option.label} {option.priceModifier > 0 && <span className="text-[10px] opacity-80 block">+{option.priceModifier.toFixed(2)}{currencySymbol}</span>}
+                                                {option.label} {option.priceModifier > 0 && <span className="text-[10px] opacity-80 block">+{formatPrice(option.priceModifier)}{currencySymbol}</span>}
                                             </div>
                                         </label>
                                     ))}
@@ -284,7 +284,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                 className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl p-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors disabled:opacity-50"
                             >
                                 {isSubmittingOrder ? <Loader2 className="animate-spin size-5" /> : <ShoppingCart className="size-5" />}
-                                {product.inStock ? `Add to Order - ${totalPrice.toFixed(2) + currencySymbol}` : 'Out of Stock'}
+                                {product.inStock ? `Add to Order - ${formatPrice(totalPrice)}${currencySymbol}` : 'Out of Stock'}
                             </button>
                         </div>
                     </div>

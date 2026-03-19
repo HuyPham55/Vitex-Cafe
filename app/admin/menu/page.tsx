@@ -5,7 +5,7 @@ import {
   Plus, Search, Edit2, Trash2, Coffee,
   Check, X, Loader2, Package, Tag, Layers
 } from 'lucide-react';
-import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
+import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function MenuManagement() {
@@ -201,7 +201,7 @@ export default function MenuManagement() {
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg">{product.name}</h3>
                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">{product.category}</span>
                 </div>
-                <p className="font-black text-primary text-lg">{product.price.toFixed(2)}{currencySymbol}</p>
+                <p className="font-black text-primary text-lg">{formatPrice(product.price)}{currencySymbol}</p>
               </div>
               <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 mb-4">{product.description}</p>
 

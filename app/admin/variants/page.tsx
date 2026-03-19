@@ -5,7 +5,7 @@ import {
     Plus, Edit2, Trash2, Check, X,
     Loader2, Layers, DollarSign, Tag
 } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function VariantManagement() {
@@ -158,7 +158,7 @@ export default function VariantManagement() {
                                 <div key={i} className="px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-primary/5 rounded-lg flex items-center gap-2">
                                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{opt.label}</span>
                                     {opt.priceModifier > 0 && (
-                                        <span className="text-[10px] font-black text-green-600">+{opt.priceModifier.toFixed(2)}{currencySymbol}</span>
+                                        <span className="text-[10px] font-black text-green-600">+{formatPrice(opt.priceModifier)}{currencySymbol}</span>
                                     )}
                                 </div>
                             ))}

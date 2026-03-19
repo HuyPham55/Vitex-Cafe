@@ -5,7 +5,7 @@ import {
   Coffee, DollarSign, Clock, CheckCircle,
   MoreVertical, Loader2, RefreshCw
 } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminDashboard() {
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
             <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">Today</span>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Today's Revenue</p>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">{stats.revenue.toFixed(2)}{currencySymbol}</h3>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">{formatPrice(stats.revenue)}{currencySymbol}</h3>
         </div>
 
         <div className="bg-white dark:bg-background-dark/50 border border-primary/10 rounded-xl p-6 shadow-sm">

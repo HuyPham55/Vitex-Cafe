@@ -5,7 +5,7 @@ import {
     Search, Filter, History, Coffee, CheckCircle,
     XCircle, Clock, MoreVertical, CreditCard, Loader2
 } from 'lucide-react';
-import { fetchAPI, endpoints } from '@/lib/api';
+import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function OrderManagement() {
@@ -166,7 +166,7 @@ export default function OrderManagement() {
                             </div>
 
                             <div className="text-right">
-                                <p className="text-2xl font-black text-slate-900 dark:text-slate-100">{order.total.toFixed(2)}{currencySymbol}</p>
+                                <p className="text-2xl font-black text-slate-900 dark:text-slate-100">{formatPrice(order.total)}{currencySymbol}</p>
                                 <div className="flex justify-end gap-2 mt-2">
                                     {order.status === 'pending' && (
                                         <button onClick={() => updateStatus(order._id, 'preparing')} className="bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">Brew</button>

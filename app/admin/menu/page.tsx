@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import {
   Plus, Search, Edit2, Trash2, Coffee,
-  Check, X, Loader2, Package, Tag, Layers
+  Check, X, Loader2, Package, Tag, Layers,
+  ChevronUp, ChevronDown
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -27,6 +28,7 @@ export default function MenuManagement() {
     category: '',
     imageUrl: '',
     inStock: true,
+    order: 0,
     variantTypes: [] as string[]
   });
 
@@ -61,6 +63,7 @@ export default function MenuManagement() {
         category: product.category,
         imageUrl: product.imageUrl || '',
         inStock: product.inStock,
+        order: product.order || 0,
         variantTypes: product.variantTypes?.map((vt: any) => vt._id || vt) || []
       });
     } else {
@@ -72,6 +75,7 @@ export default function MenuManagement() {
         category: '',
         imageUrl: '',
         inStock: true,
+        order: products.length > 0 ? Math.max(...products.map(p => p.order || 0)) + 1 : 0,
         variantTypes: []
       });
     }
@@ -95,6 +99,7 @@ export default function MenuManagement() {
       data.append('price', formData.price.toString());
       data.append('category', formData.category);
       data.append('inStock', formData.inStock.toString());
+      data.append('order', formData.order.toString());
       data.append('variantTypes', JSON.stringify(formData.variantTypes));
       
       if (imageFile) {
@@ -150,6 +155,43 @@ export default function MenuManagement() {
       alert(error.message || 'Failed to toggle stock');
     }
   };
+  
+  const handleMoveOrder = async (product: any, direction: 'up' | 'down') => {
+    const sortedProducts = [...products].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const currentIndex = sortedProducts.findIndex(p => p._id === product._id);
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= sortedProducts.length) return;
+
+    const targetProduct = sortedProducts[targetIndex];
+
+    try {
+      let currentOrder = product.order ?? currentIndex;
+      let targetOrder = targetProduct.order ?? targetIndex;
+
+      if (currentOrder === targetOrder) {
+        currentOrder = currentIndex;
+        targetOrder = targetIndex;
+      }
+
+      await Promise.all([
+        fetchAPI(`${endpoints.products}/${product._id}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ ...product, order: targetOrder })
+        }),
+        fetchAPI(`${endpoints.products}/${targetProduct._id}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ ...targetProduct, order: currentOrder })
+        })
+      ]);
+
+      getData();
+    } catch (error: any) {
+      alert(error.message || 'Failed to move order');
+    }
+  };
 
   if (loading && products.length === 0) {
     return (
@@ -183,7 +225,7 @@ export default function MenuManagement() {
                 alt={product.name} 
                 className="w-full h-full object-cover transition-transform group-hover:scale-105" 
               />
-              <div className="absolute top-3 right-3 flex gap-2">
+              <div className="absolute top-3 right-3 flex gap-2 items-start">
                 <button
                   onClick={() => toggleStock(product)}
                   className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-md ${product.inStock
@@ -193,6 +235,22 @@ export default function MenuManagement() {
                 >
                   {product.inStock ? 'In Stock' : 'Sold Out'}
                 </button>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleMoveOrder(product, 'up'); }}
+                    className="p-1.5 bg-white/90 dark:bg-slate-800/90 rounded-full text-slate-700 hover:text-primary transition-colors shadow-md border border-primary/10"
+                    title="Move Up"
+                  >
+                    <ChevronUp className="size-3" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleMoveOrder(product, 'down'); }}
+                    className="p-1.5 bg-white/90 dark:bg-slate-800/90 rounded-full text-slate-700 hover:text-primary transition-colors shadow-md border border-primary/10"
+                    title="Move Down"
+                  >
+                    <ChevronDown className="size-3" />
+                  </button>
+                </div>
               </div>
             </div>
             <div className="p-5 flex-1 flex flex-col">
@@ -274,6 +332,16 @@ export default function MenuManagement() {
                       placeholder="e.g. Cold Drinks"
                       value={formData.category}
                       onChange={e => setFormData({ ...formData, category: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Display Order</label>
+                    <input
+                      type="number"
+                      className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary outline-none"
+                      value={formData.order}
+                      onChange={e => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
                       required
                     />
                   </div>

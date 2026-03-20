@@ -133,7 +133,7 @@ function OrdersPageContent() {
                       : 'bg-white dark:bg-slate-900 border-primary/5 hover:border-primary/20 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm'
                   }`}
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-1">
                     <span className="font-black text-lg text-slate-900 dark:text-slate-100">#{o.orderNumber}</span>
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
                       o.paymentStatus === 'paid' 
@@ -143,6 +143,9 @@ function OrdersPageContent() {
                       {o.paymentStatus}
                     </span>
                   </div>
+                  <p className="text-slate-700 dark:text-slate-300 text-xs font-bold mb-2 truncate">
+                    {o.customerName}
+                  </p>
                   <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center gap-2 font-medium">
                     <Calendar className="size-3" />
                     {new Date(o.createdAt).toLocaleDateString()} • {new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -180,7 +183,7 @@ function OrdersPageContent() {
                 <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 relative z-10">
                   <div>
                     <h2 className="text-4xl font-black tracking-tighter">Order #{order.orderNumber}</h2>
-                    <p className="opacity-90 font-medium mt-1">Found in our roasting logs</p>
+                    <p className="opacity-90 font-medium mt-1">Found in our roasting logs • <span className="font-bold">{order.customerName}</span></p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="size-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">

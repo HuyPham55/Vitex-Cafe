@@ -13,6 +13,18 @@ function OrdersPageContent() {
   const router = useRouter();
   const orderIdParam = searchParams.get('id');
 
+  const formatRelativeDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInDays = Math.floor(diffInSeconds / 86400);
+
+    if (diffInDays === 0) return 'Today';
+    if (diffInDays === 1) return 'Yesterday';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    return date.toLocaleDateString();
+  };
+
   const [searchId, setSearchId] = useState(orderIdParam || '');
   const [order, setOrder] = useState<any>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -148,7 +160,7 @@ function OrdersPageContent() {
                   </p>
                   <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center gap-2 font-medium">
                     <Calendar className="size-3" />
-                    {new Date(o.createdAt).toLocaleDateString()} • {new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <span className="text-primary font-bold">{formatRelativeDate(o.createdAt)}</span> • {new Date(o.createdAt).toLocaleDateString()} • {new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               ))

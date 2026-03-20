@@ -5,9 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   CheckCircle, CreditCard, Info, Receipt,
-  ArrowRight, Coffee, Loader2, Clock, Check, X
+  ArrowRight, Coffee, Loader2, Clock, Check, X, QrCode
 } from 'lucide-react';
-import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
+import { fetchAPI, endpoints, formatPrice, getImageUrl } from '@/lib/api';
 
 function OrderStatusContent() {
   const searchParams = useSearchParams();
@@ -184,14 +184,45 @@ function OrderStatusContent() {
 
           {/* Payment & Info */}
           <div className="flex flex-col gap-6">
-            <div className="bg-white dark:bg-background-dark/50 border border-primary/10 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2 border-b border-primary/10 pb-4">
-                <CreditCard className="text-primary size-5" /> Payment Instructions
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                {settings?.paymentDescription || order.paymentDescription || 'Please pay at the counter.'}
-              </p>
-            </div>
+            {/* Redesigned Payment Section */}
+            {(settings?.paymentQRCode || settings?.paymentDescription || order.paymentDescription) && (
+              <div className="bg-white dark:bg-primary/5 rounded-2xl p-8 border border-primary/10 mb-2 shadow-sm">
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex items-center gap-2 mb-2">
+                    <QrCode className="text-primary size-6" />
+                    <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold">Scan to Pay</h2>
+                  </div>
+
+                  {settings?.paymentQRCode && (
+                    <div className="bg-white p-4 rounded-xl mb-6 shadow-md border border-slate-100">
+                      <img
+                        src={getImageUrl(settings.paymentQRCode)}
+                        alt="Payment QR Code"
+                        className="w-48 h-48 object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <div className="mb-6">
+                    <span className="text-slate-500 dark:text-slate-400 text-sm block mb-1">Total Amount Due</span>
+                    <div className="text-4xl font-black text-primary">
+                      {formatPrice(order.total || 0)}{settings?.currencySymbol || '$'}
+                    </div>
+                  </div>
+
+                  <div className="w-full py-4 px-6 bg-primary/5 rounded-xl border border-primary/10">
+                    <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                      {settings?.paymentDescription || order.paymentDescription || 'Please pay at the counter.'}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Info className="size-4" />
+                    <span className="text-xs italic">Show your confirmation screen to the barista</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl p-6 flex items-start gap-4">
               <Info className="text-blue-500 size-6 shrink-0 mt-1" />

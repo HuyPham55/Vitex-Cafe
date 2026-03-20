@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
     Settings, Clock, CreditCard, Save,
-    Loader2, Check, RefreshCw
+    Loader2, Check, RefreshCw, X, QrCode
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +18,9 @@ export default function StoreSettings() {
     const [newHeroImages, setNewHeroImages] = useState<File[]>([]);
     const [existingGalleryImages, setExistingGalleryImages] = useState<string[]>([]);
     const [newGalleryImages, setNewGalleryImages] = useState<File[]>([]);
+    const [existingPaymentQRCode, setExistingPaymentQRCode] = useState<string | null>(null);
+    const [newPaymentQRCode, setNewPaymentQRCode] = useState<File | null>(null);
+    const [removePaymentQRCode, setRemovePaymentQRCode] = useState(false);
 
     const [formData, setFormData] = useState({
         openTime: '08:00',
@@ -37,6 +40,9 @@ export default function StoreSettings() {
             });
             setExistingHeroImages(data.heroImages || []);
             setExistingGalleryImages(data.galleryImages || []);
+            setExistingPaymentQRCode(data.paymentQRCode || null);
+            setRemovePaymentQRCode(false);
+            setNewPaymentQRCode(null);
         } catch (error) {
             console.error('Failed to fetch settings:', error);
         } finally {
@@ -92,6 +98,12 @@ export default function StoreSettings() {
 
             existingGalleryImages.forEach(img => formDataObj.append('existingGalleryImages', img));
             newGalleryImages.forEach(file => formDataObj.append('newGalleryImages', file));
+
+            if (newPaymentQRCode) {
+                formDataObj.append('paymentQRCode', newPaymentQRCode);
+            } else if (removePaymentQRCode) {
+                formDataObj.append('removePaymentQRCode', 'true');
+            }
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${endpoints.settings}`, {
                 method: 'PUT',
@@ -281,6 +293,67 @@ export default function StoreSettings() {
                             <span className="text-[10px] uppercase font-bold mt-1">Add Image</span>
                             <input type="file" multiple accept="image/*" className="hidden" onChange={handleGalleryPhotoChange} />
                         </label>
+                    </div>
+                </div>
+
+                {/* Payment QR Code settings */}
+                <div className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8 border-b border-primary/5 pb-4">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
+                            <span className="font-bold text-center w-5 h-5 flex items-center justify-center">💳</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Payment QR Code</h3>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        {(existingPaymentQRCode && !removePaymentQRCode) ? (
+                            <div className="relative h-48 w-48 rounded-xl overflow-hidden border border-primary/20 shadow-md">
+                                <img
+                                    src={getImageUrl(existingPaymentQRCode)}
+                                    alt="Payment QR Code"
+                                    className="w-full h-full object-contain bg-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setRemovePaymentQRCode(true)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                                >
+                                    <X className="size-4" />
+                                </button>
+                            </div>
+                        ) : newPaymentQRCode ? (
+                            <div className="relative h-48 w-48 rounded-xl overflow-hidden border border-primary/20 shadow-md">
+                                <img
+                                    src={URL.createObjectURL(newPaymentQRCode)}
+                                    alt="Preview Payment QR Code"
+                                    className="w-full h-full object-contain bg-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setNewPaymentQRCode(null)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                                >
+                                    <X className="size-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <label className="h-48 w-48 border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center text-primary/50 cursor-pointer hover:bg-primary/5 transition-all group">
+                                <span className="font-bold text-3xl group-hover:scale-110 transition-transform">+</span>
+                                <span className="text-xs uppercase font-bold mt-2">Upload QR Code</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setNewPaymentQRCode(e.target.files[0]);
+                                            setRemovePaymentQRCode(false);
+                                        }
+                                    }}
+                                />
+                            </label>
+                        )}
+                        <p className="text-xs text-slate-400 italic">This image will be displayed on the order confirmation screen for customers to scan.</p>
                     </div>
                 </div>
 

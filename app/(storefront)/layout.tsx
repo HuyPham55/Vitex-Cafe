@@ -21,7 +21,7 @@ export default function StorefrontLayout({
             <Link href="/menu" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Menu</Link>
             <Link href="/product" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Product</Link>
             <Link href="/asmr" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">ASMR</Link>
-            <Link href="/order" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Order Status</Link>
+            <Link href="/orders" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Orders</Link>
             <Link href="/admin" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Admin</Link>
           </nav>
           <div className="flex gap-3">

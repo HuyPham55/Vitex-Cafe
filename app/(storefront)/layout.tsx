@@ -44,7 +44,6 @@ export default async function StorefrontLayout({
             <Link href="/product" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Product</Link>
             <Link href="/asmr" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">ASMR</Link>
             <Link href="/orders" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Orders</Link>
-            <Link href="/admin" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Admin</Link>
           </nav>
           <div className="flex gap-3">
             <button className="flex items-center justify-center rounded-xl size-10 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all">

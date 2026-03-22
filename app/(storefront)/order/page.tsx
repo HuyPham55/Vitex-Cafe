@@ -16,6 +16,8 @@ function OrderStatusContent() {
   const [order, setOrder] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!orderId) {
@@ -48,6 +50,22 @@ function OrderStatusContent() {
 
     return () => clearInterval(interval);
   }, [orderId]);
+
+  const handleSelfPay = async () => {
+    if (!orderId) return;
+    setIsSubmitting(true);
+    try {
+      const updatedOrder = await fetchAPI(`${endpoints.orders}/${orderId}/self-pay`, {
+        method: 'POST'
+      });
+      setOrder(updatedOrder);
+      setShowConfirmModal(false);
+    } catch (error: any) {
+      alert(error.message || 'Failed to update payment status');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -219,6 +237,54 @@ function OrderStatusContent() {
                   <div className="mt-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
                     <Info className="size-4" />
                     <span className="text-xs italic">Show your confirmation screen to the barista</span>
+                  </div>
+
+                  {order.paymentStatus === 'unpaid' ? (
+                    <button
+                      onClick={() => setShowConfirmModal(true)}
+                      className="mt-8 w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-600/20 active:scale-[0.98]"
+                    >
+                      <Check className="size-5" />
+                      I confirm I have completed the payment
+                    </button>
+                  ) : (
+                    <div className="mt-8 w-full py-4 px-6 bg-green-50 dark:bg-green-900/20 text-green-600 border border-green-200 dark:border-green-800 rounded-xl font-bold flex items-center justify-center gap-2">
+                      <CheckCircle className="size-5" />
+                      Payment Confirmed ✓
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                  <div className="p-8 text-center">
+                    <div className="size-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <CreditCard className="size-8" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">Confirm Payment</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                      Are you sure you have completed the payment? This action <span className="text-red-500 font-bold">cannot be undone</span>.
+                    </p>
+                  </div>
+                  <div className="flex border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={() => setShowConfirmModal(false)}
+                      disabled={isSubmitting}
+                      className="flex-1 py-4 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-r border-slate-100 dark:border-slate-800 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSelfPay}
+                      disabled={isSubmitting}
+                      className="flex-1 py-4 text-green-600 font-bold hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {isSubmitting ? <Loader2 className="animate-spin size-4" /> : 'Yes, Confirm'}
+                    </button>
                   </div>
                 </div>
               </div>

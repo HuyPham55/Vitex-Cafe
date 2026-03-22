@@ -22,6 +22,14 @@ export default function StoreSettings() {
     const [newPaymentQRCode, setNewPaymentQRCode] = useState<File | null>(null);
     const [removePaymentQRCode, setRemovePaymentQRCode] = useState(false);
 
+    const [existingLogo, setExistingLogo] = useState<string | null>(null);
+    const [newLogo, setNewLogo] = useState<File | null>(null);
+    const [removeLogo, setRemoveLogo] = useState(false);
+
+    const [existingFavicon, setExistingFavicon] = useState<string | null>(null);
+    const [newFavicon, setNewFavicon] = useState<File | null>(null);
+    const [removeFavicon, setRemoveFavicon] = useState(false);
+
     const [formData, setFormData] = useState({
         openTime: '08:00',
         closeTime: '22:00',
@@ -43,6 +51,14 @@ export default function StoreSettings() {
             setExistingPaymentQRCode(data.paymentQRCode || null);
             setRemovePaymentQRCode(false);
             setNewPaymentQRCode(null);
+
+            setExistingLogo(data.logo || null);
+            setRemoveLogo(false);
+            setNewLogo(null);
+
+            setExistingFavicon(data.favicon || null);
+            setRemoveFavicon(false);
+            setNewFavicon(null);
         } catch (error) {
             console.error('Failed to fetch settings:', error);
         } finally {
@@ -105,6 +121,18 @@ export default function StoreSettings() {
                 formDataObj.append('removePaymentQRCode', 'true');
             }
 
+            if (newLogo) {
+                formDataObj.append('logo', newLogo);
+            } else if (removeLogo) {
+                formDataObj.append('removeLogo', 'true');
+            }
+
+            if (newFavicon) {
+                formDataObj.append('favicon', newFavicon);
+            } else if (removeFavicon) {
+                formDataObj.append('removeFavicon', 'true');
+            }
+
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${endpoints.settings}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${token}` },
@@ -146,6 +174,128 @@ export default function StoreSettings() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Branding settings */}
+                <div className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8 border-b border-primary/5 pb-4">
+                        <div className="p-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 rounded-lg">
+                            <Settings className="size-5" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Branding</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Logo Upload */}
+                        <div className="space-y-4">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Store Logo</label>
+                            <div className="flex flex-col gap-4">
+                                {(existingLogo && !removeLogo) ? (
+                                    <div className="relative h-32 w-full max-w-[200px] rounded-xl overflow-hidden border border-primary/20 shadow-sm bg-slate-50 dark:bg-slate-800">
+                                        <img
+                                            src={getImageUrl(existingLogo)}
+                                            alt="Store Logo"
+                                            className="w-full h-full object-contain p-2"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setRemoveLogo(true)}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    </div>
+                                ) : newLogo ? (
+                                    <div className="relative h-32 w-full max-w-[200px] rounded-xl overflow-hidden border border-primary/20 shadow-sm bg-slate-50 dark:bg-slate-800">
+                                        <img
+                                            src={URL.createObjectURL(newLogo)}
+                                            alt="Preview Logo"
+                                            className="w-full h-full object-contain p-2"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewLogo(null)}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label className="h-32 w-full max-w-[200px] border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center text-primary/50 cursor-pointer hover:bg-primary/5 transition-all group">
+                                        <span className="font-bold text-2xl group-hover:scale-110 transition-transform">+</span>
+                                        <span className="text-[10px] uppercase font-bold mt-1 text-center px-2">Upload Logo</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setNewLogo(e.target.files[0]);
+                                                    setRemoveLogo(false);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                )}
+                                <p className="text-[10px] text-slate-400 italic">Recommended size: 200x200px or larger. PNG or SVG preferred.</p>
+                            </div>
+                        </div>
+
+                        {/* Favicon Upload */}
+                        <div className="space-y-4">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Site Favicon</label>
+                            <div className="flex flex-col gap-4">
+                                {(existingFavicon && !removeFavicon) ? (
+                                    <div className="relative h-20 w-20 rounded-xl overflow-hidden border border-primary/20 shadow-sm bg-white">
+                                        <img
+                                            src={getImageUrl(existingFavicon)}
+                                            alt="Favicon"
+                                            className="w-full h-full object-contain p-4"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setRemoveFavicon(true)}
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow-md hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-3" />
+                                        </button>
+                                    </div>
+                                ) : newFavicon ? (
+                                    <div className="relative h-20 w-20 rounded-xl overflow-hidden border border-primary/20 shadow-sm bg-white">
+                                        <img
+                                            src={URL.createObjectURL(newFavicon)}
+                                            alt="Preview Favicon"
+                                            className="w-full h-full object-contain p-4"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewFavicon(null)}
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow-md hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-3" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label className="h-20 w-20 border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center text-primary/50 cursor-pointer hover:bg-primary/5 transition-all group">
+                                        <span className="font-bold text-xl group-hover:scale-110 transition-transform">+</span>
+                                        <span className="text-[10px] uppercase font-bold text-center px-1">Favicon</span>
+                                        <input
+                                            type="file"
+                                            accept="image/x-icon,image/png,image/svg+xml"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setNewFavicon(e.target.files[0]);
+                                                    setRemoveFavicon(false);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                )}
+                                <p className="text-[10px] text-slate-400 italic">Square image (32x32 or 64x64px). ICO, PNG, or SVG.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Trading Hours */}
                 <div className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-8 border-b border-primary/5 pb-4">

@@ -7,10 +7,30 @@ const workSans = Work_Sans({
   variable: '--font-work-sans',
 });
 
-export const metadata: Metadata = {
-  title: 'The Daily Grind',
-  description: 'Experience the Perfect Brew',
-};
+import { endpoints, getImageUrl } from '@/lib/api';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  let settings;
+  try {
+    const res = await fetch(`${API_URL}${endpoints.settings}`, { cache: 'no-store' });
+    if (res.ok) {
+      settings = await res.json();
+    }
+  } catch (error) {
+    console.error('Failed to fetch settings for metadata:', error);
+  }
+
+  const faviconUrl = settings?.favicon ? getImageUrl(settings.favicon) : '/favicon.ico';
+
+  return {
+    title: 'The Daily Grind',
+    description: 'Experience the Perfect Brew',
+    icons: {
+      icon: faviconUrl,
+    },
+  };
+}
 
 import { AuthProvider } from '@/context/AuthContext';
 

@@ -1,19 +1,40 @@
 import Link from 'next/link';
 import { Coffee, ShoppingBag, User, Mail, Phone, MapPin } from 'lucide-react';
+import { endpoints, getImageUrl } from '@/lib/api';
 
-export default function StorefrontLayout({
+async function getSettings() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  try {
+    const res = await fetch(`${API_URL}${endpoints.settings}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  } catch (error) {
+    return null;
+  }
+}
+
+export default async function StorefrontLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getSettings();
+  const logoUrl = settings?.logo ? getImageUrl(settings.logo) : null;
+
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 px-6 md:px-20 py-4 bg-white/80 dark:bg-background-dark/80 sticky top-0 z-50 backdrop-blur-md">
         <Link href="/" className="flex items-center gap-3 text-primary">
-          <div className="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
-            <Coffee className="size-5" />
+          <div className="size-10 flex items-center justify-center bg-primary/10 rounded-lg overflow-hidden">
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+            ) : (
+              <Coffee className="size-6" />
+            )}
           </div>
-          <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">The Daily Grind</h2>
+          <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">
+            The Daily Grind
+          </h2>
         </Link>
         <div className="flex flex-1 justify-end gap-8 items-center">
           <nav className="hidden md:flex items-center gap-8">
@@ -41,7 +62,13 @@ export default function StorefrontLayout({
         <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 text-primary mb-4">
-              <Coffee className="size-6" />
+              <div className="size-10 flex items-center justify-center bg-primary/10 rounded-lg overflow-hidden">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                ) : (
+                  <Coffee className="size-6" />
+                )}
+              </div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">The Daily Grind</h2>
             </div>
             <p className="text-slate-500 dark:text-slate-400 max-w-sm">

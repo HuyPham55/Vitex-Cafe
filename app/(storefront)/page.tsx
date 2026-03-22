@@ -219,6 +219,16 @@ export default function Home() {
           className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
+          <div
+              className="relative max-w-5xl w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+          >
+            <img
+                src={getImageUrl(selectedImage)}
+                alt="Gallery Preview"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+            />
+          </div>
           <button 
             className="absolute top-6 right-6 text-white hover:text-primary transition-colors p-2 bg-white/10 rounded-full"
             onClick={(e) => {
@@ -228,17 +238,6 @@ export default function Home() {
           >
             <X size={32} />
           </button>
-          
-          <div 
-            className="relative max-w-5xl w-full h-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img 
-              src={getImageUrl(selectedImage)} 
-              alt="Gallery Preview" 
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
-            />
-          </div>
         </div>
       )}
     </div>

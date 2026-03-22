@@ -23,6 +23,9 @@ export default async function StorefrontLayout({
   const logoUrl = settings?.logo ? getImageUrl(settings.logo) : null;
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind';
   const footerDescription = settings?.footerDescription || 'Experience the best coffee in town. We roast our own beans and craft each cup with care.';
+  const contactEmail = settings?.contactEmail || 'hello@dailygrind.com';
+  const contactPhone = settings?.contactPhone || '(555) 123-4567';
+  const contactLocation = settings?.contactLocation || '123 Brew St, Bean City';
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
@@ -83,9 +86,9 @@ export default async function StorefrontLayout({
           <div>
             <h4 className="font-bold mb-4 text-slate-900 dark:text-slate-100">Contact</h4>
             <ul className="space-y-2 text-slate-500 dark:text-slate-400 text-sm">
-              <li className="flex items-center gap-2"><Mail className="size-4" /> hello@dailygrind.com</li>
-              <li className="flex items-center gap-2"><Phone className="size-4" /> (555) 123-4567</li>
-              <li className="flex items-center gap-2"><MapPin className="size-4" /> 123 Brew St, Bean City</li>
+              <li className="flex items-center gap-2"><Mail className="size-4" /> {contactEmail}</li>
+              <li className="flex items-center gap-2"><Phone className="size-4" /> {contactPhone}</li>
+              <li className="flex items-center gap-2"><MapPin className="size-4" /> {contactLocation}</li>
             </ul>
           </div>
         </div>

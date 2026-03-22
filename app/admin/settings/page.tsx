@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
     Settings, Clock, CreditCard, Save,
-    Loader2, Check, RefreshCw, X, QrCode
+    Loader2, Check, RefreshCw, X, QrCode, Mail, Phone, MapPin
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -35,7 +35,10 @@ export default function StoreSettings() {
         closeTime: '22:00',
         paymentDescription: '',
         currencySymbol: '$',
-        footerDescription: ''
+        footerDescription: '',
+        contactEmail: '',
+        contactPhone: '',
+        contactLocation: ''
     });
 
     const getSettings = async () => {
@@ -46,7 +49,10 @@ export default function StoreSettings() {
                 closeTime: data.closeTime || '22:00',
                 paymentDescription: data.paymentDescription || '',
                 currencySymbol: data.currencySymbol || '$',
-                footerDescription: data.footerDescription || ''
+                footerDescription: data.footerDescription || '',
+                contactEmail: data.contactEmail || '',
+                contactPhone: data.contactPhone || '',
+                contactLocation: data.contactLocation || ''
             });
             setExistingHeroImages(data.heroImages || []);
             setExistingGalleryImages(data.galleryImages || []);
@@ -112,6 +118,9 @@ export default function StoreSettings() {
             formDataObj.append('paymentDescription', formData.paymentDescription);
             formDataObj.append('footerDescription', formData.footerDescription);
             formDataObj.append('currencySymbol', formData.currencySymbol);
+            formDataObj.append('contactEmail', formData.contactEmail);
+            formDataObj.append('contactPhone', formData.contactPhone);
+            formDataObj.append('contactLocation', formData.contactLocation);
 
             existingHeroImages.forEach(img => formDataObj.append('existingHeroImages', img));
             newHeroImages.forEach(file => formDataObj.append('newHeroImages', file));
@@ -306,6 +315,49 @@ export default function StoreSettings() {
                                 onChange={(e) => setFormData({ ...formData, footerDescription: e.target.value })}
                                 className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-primary min-h-[100px] resize-y"
                                 placeholder="Enter a short description about the store for the footer..."
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8 border-b border-primary/5 pb-4">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
+                            <Mail className="size-5" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Contact Information</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2"><Mail className="size-3" /> Email Address</label>
+                            <input
+                                type="email"
+                                className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-4 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                                value={formData.contactEmail}
+                                onChange={e => setFormData({ ...formData, contactEmail: e.target.value })}
+                                placeholder="hello@dailygrind.com"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2"><Phone className="size-3" /> Phone Number</label>
+                            <input
+                                type="text"
+                                className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-4 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                                value={formData.contactPhone}
+                                onChange={e => setFormData({ ...formData, contactPhone: e.target.value })}
+                                placeholder="(555) 123-4567"
+                            />
+                        </div>
+                        <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/5">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2"><MapPin className="size-3" /> Store Location</label>
+                            <input
+                                type="text"
+                                className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-4 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                                value={formData.contactLocation}
+                                onChange={e => setFormData({ ...formData, contactLocation: e.target.value })}
+                                placeholder="123 Brew St, Bean City"
                             />
                         </div>
                     </div>

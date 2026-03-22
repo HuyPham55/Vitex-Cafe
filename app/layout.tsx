@@ -25,7 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const faviconUrl = settings?.favicon ? getImageUrl(settings.favicon) : '/favicon.ico';
 
   return {
-    title: siteName,
+    title: {
+      default: siteName,
+      template: `%s | ${siteName}`,
+    },
     description: 'Experience the Perfect Brew',
     icons: {
       icon: faviconUrl,

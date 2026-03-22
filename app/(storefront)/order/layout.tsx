@@ -1,0 +1,9 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Order Confirmation',
+};
+
+export default function OrderLayout({ children }: { children: React.ReactNode }) {
+    return children;
+}

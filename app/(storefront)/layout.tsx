@@ -22,6 +22,7 @@ export default async function StorefrontLayout({
   const settings = await getSettings();
   const logoUrl = settings?.logo ? getImageUrl(settings.logo) : null;
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind';
+  const footerDescription = settings?.footerDescription || 'Experience the best coffee in town. We roast our own beans and craft each cup with care.';
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
@@ -67,7 +68,7 @@ export default async function StorefrontLayout({
               <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{siteName}</h2>
             </div>
             <p className="text-slate-500 dark:text-slate-400 max-w-sm">
-              Experience the best coffee in town. We roast our own beans and craft each cup with care.
+              {footerDescription}
             </p>
           </div>
           <div>

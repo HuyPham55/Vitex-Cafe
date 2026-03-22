@@ -34,7 +34,8 @@ export default function StoreSettings() {
         openTime: '08:00',
         closeTime: '22:00',
         paymentDescription: '',
-        currencySymbol: '$'
+        currencySymbol: '$',
+        footerDescription: ''
     });
 
     const getSettings = async () => {
@@ -44,7 +45,8 @@ export default function StoreSettings() {
                 openTime: data.openTime || '08:00',
                 closeTime: data.closeTime || '22:00',
                 paymentDescription: data.paymentDescription || '',
-                currencySymbol: data.currencySymbol || '$'
+                currencySymbol: data.currencySymbol || '$',
+                footerDescription: data.footerDescription || ''
             });
             setExistingHeroImages(data.heroImages || []);
             setExistingGalleryImages(data.galleryImages || []);
@@ -108,6 +110,8 @@ export default function StoreSettings() {
             formDataObj.append('openTime', formData.openTime);
             formDataObj.append('closeTime', formData.closeTime);
             formDataObj.append('paymentDescription', formData.paymentDescription);
+            formDataObj.append('footerDescription', formData.footerDescription);
+            formDataObj.append('currencySymbol', formData.currencySymbol);
 
             existingHeroImages.forEach(img => formDataObj.append('existingHeroImages', img));
             newHeroImages.forEach(file => formDataObj.append('newHeroImages', file));
@@ -292,6 +296,17 @@ export default function StoreSettings() {
                                 )}
                                 <p className="text-[10px] text-slate-400 italic">Square image (32x32 or 64x64px). ICO, PNG, or SVG.</p>
                             </div>
+                        </div>
+                        
+                        {/* Footer Description */}
+                        <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/5">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Footer Description</label>
+                            <textarea
+                                value={formData.footerDescription}
+                                onChange={(e) => setFormData({ ...formData, footerDescription: e.target.value })}
+                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-primary min-h-[100px] resize-y"
+                                placeholder="Enter a short description about the store for the footer..."
+                            />
                         </div>
                     </div>
                 </div>

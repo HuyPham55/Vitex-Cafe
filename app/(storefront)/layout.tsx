@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Coffee, ShoppingBag, User, Mail, Phone, MapPin } from 'lucide-react';
 import { endpoints, getImageUrl } from '@/lib/api';
+import StorefrontNav from '@/components/StorefrontNav';
 
 async function getSettings() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -38,13 +39,7 @@ export default async function StorefrontLayout({
           </h2>
         </Link>
         <div className="flex flex-1 justify-end gap-8 items-center">
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Home</Link>
-            <Link href="/menu" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Menu</Link>
-            <Link href="/product" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Product</Link>
-            <Link href="/asmr" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">ASMR</Link>
-            <Link href="/orders" className="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors">Orders</Link>
-          </nav>
+          <StorefrontNav />
           <div className="flex gap-3">
             <button className="flex items-center justify-center rounded-xl size-10 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all">
               <ShoppingBag className="size-5" />

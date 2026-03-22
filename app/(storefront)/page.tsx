@@ -95,7 +95,7 @@ export default function Home() {
                   Experience the <span className="text-primary">Perfect Brew</span>
                 </h1>
                 <p className="text-slate-200 text-lg font-normal leading-relaxed">
-                  Welcome to The Daily Grind, where every single bean is roasted to perfection and every cup is crafted with passion.
+                  Welcome to {process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind'}, where every single bean is roasted to perfection and every cup is crafted with passion.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-4 z-10">
@@ -219,6 +219,16 @@ export default function Home() {
           className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
+          <div
+              className="relative max-w-5xl w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+          >
+            <img
+                src={getImageUrl(selectedImage)}
+                alt="Gallery Preview"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+            />
+          </div>
           <button 
             className="absolute top-6 right-6 text-white hover:text-primary transition-colors p-2 bg-white/10 rounded-full"
             onClick={(e) => {
@@ -228,17 +238,6 @@ export default function Home() {
           >
             <X size={32} />
           </button>
-          
-          <div 
-            className="relative max-w-5xl w-full h-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img 
-              src={getImageUrl(selectedImage)} 
-              alt="Gallery Preview" 
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
-            />
-          </div>
         </div>
       )}
     </div>

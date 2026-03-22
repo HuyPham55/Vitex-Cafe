@@ -117,18 +117,33 @@ export default function OrderManagement() {
                                         {order.paymentStatus}
                                     </span>
                                 </div>
-                                <p className="font-bold text-slate-900 dark:text-slate-100">{order.customerName}</p>
+                                <p className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                    {order.customerName}
+                                    {order.isAnonymous && (
+                                        <span className="text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Anon</span>
+                                    )}
+                                </p>
                                 <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleString()}</p>
                             </div>
 
                             <div className="md:col-span-1">
-                                <div className="space-y-1">
+                                <div className="space-y-2">
                                     {order.items.map((item: any, i: number) => (
                                         <div key={i} className="text-xs">
                                             <span className="font-bold text-slate-700 dark:text-slate-300">{item.quantity}x {item.name}</span>
-                                            <p className="text-[10px] text-slate-500 truncate">
-                                                {(item.variantOptions || item.selectedVariants || []).map((v: any) => v.selectedOption || v.option).join(', ')}
-                                            </p>
+                                            {(item.variantOptions || item.selectedVariants || []).length > 0 && (
+                                                <div className="flex flex-wrap gap-1 mt-1">
+                                                    {(item.variantOptions || item.selectedVariants || []).map((v: any, vi: number) => (
+                                                        <span
+                                                            key={vi}
+                                                            className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                                        >
+                                                            <span className="opacity-70">{v.name}:</span>
+                                                            {v.selectedOption || v.option}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                     {order.note && (

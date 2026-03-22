@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
     Coffee, Droplets, Snowflake, Cuboid, User,
     FileEdit, ShoppingCart, Star, MessageSquare, Camera,
-    Plus, Minus, Check, Loader2, Image as ImageIcon, X
+    Plus, Minus, Check, Loader2, Image as ImageIcon, X, Info
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 
@@ -21,6 +21,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const [quantity, setQuantity] = useState(1);
     const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>({});
     const [customerName, setCustomerName] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
     const [note, setNote] = useState('');
 
     // Review form state
@@ -57,7 +58,17 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
             }
         };
         getData();
+
+        // Load anonymous preference
+        const savedAnon = localStorage.getItem('anonymous_order');
+        if (savedAnon !== null) {
+            setIsAnonymous(savedAnon === 'true');
+        }
     }, [id]);
+
+    useEffect(() => {
+        localStorage.setItem('anonymous_order', isAnonymous.toString());
+    }, [isAnonymous]);
 
     const handleVariantChange = (vtName: string, option: any) => {
         setSelectedVariants(prev => ({ ...prev, [vtName]: option }));
@@ -91,7 +102,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     subtotal: itemPrice * quantity
                 }],
                 note,
-                total: totalPrice
+                total: totalPrice,
+                isAnonymous
             };
 
             const result = await fetchAPI(endpoints.orders, {
@@ -252,6 +264,27 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                     value={customerName}
                                     onChange={(e) => setCustomerName(e.target.value)}
                                 />
+                            </div>
+
+                            {/* Anonymous Toggle */}
+                            <div className="flex items-center gap-3 px-2">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={isAnonymous}
+                                        onChange={(e) => setIsAnonymous(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                    <span className="ms-3 text-sm font-bold text-slate-700 dark:text-slate-300">Order anonymously</span>
+                                </label>
+                                <div className="group relative">
+                                    <Info className="size-4 text-slate-400 cursor-help" />
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center shadow-xl">
+                                        Your real name will be visible only to the staff. Others will see your order as "Anonymous" in the live status queue.
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div className="relative">
                                 <FileEdit className="absolute left-4 top-4 text-primary size-5" />

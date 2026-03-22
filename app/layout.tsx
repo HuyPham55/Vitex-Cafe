@@ -21,10 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error('Failed to fetch settings for metadata:', error);
   }
 
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind';
   const faviconUrl = settings?.favicon ? getImageUrl(settings.favicon) : '/favicon.ico';
 
   return {
-    title: 'The Daily Grind',
+    title: siteName,
     description: 'Experience the Perfect Brew',
     icons: {
       icon: faviconUrl,

@@ -20,6 +20,7 @@ export default async function StorefrontLayout({
 }) {
   const settings = await getSettings();
   const logoUrl = settings?.logo ? getImageUrl(settings.logo) : null;
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind';
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
@@ -33,7 +34,7 @@ export default async function StorefrontLayout({
             )}
           </div>
           <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">
-            The Daily Grind
+            {siteName}
           </h2>
         </Link>
         <div className="flex flex-1 justify-end gap-8 items-center">
@@ -69,10 +70,10 @@ export default async function StorefrontLayout({
                   <Coffee className="size-6" />
                 )}
               </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">The Daily Grind</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{siteName}</h2>
             </div>
             <p className="text-slate-500 dark:text-slate-400 max-w-sm">
-              Crafting the finest specialty coffee in the heart of the city since 2012. We believe in sustainable beans and perfect roasts.
+              Experience the best coffee in town. We roast our own beans and craft each cup with care.
             </p>
           </div>
           <div>
@@ -94,7 +95,7 @@ export default async function StorefrontLayout({
           </div>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-10 pt-6 border-t border-primary/5 text-center text-slate-400 text-xs">
-          © 2024 The Daily Grind Coffee Co. All rights reserved.
+          © {new Date().getFullYear()} {siteName}. All rights reserved.
         </div>
       </footer>
     </div>

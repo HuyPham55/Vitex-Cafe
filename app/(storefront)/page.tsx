@@ -95,7 +95,7 @@ export default function Home() {
                   Experience the <span className="text-primary">Perfect Brew</span>
                 </h1>
                 <p className="text-slate-200 text-lg font-normal leading-relaxed">
-                  Welcome to The Daily Grind, where every single bean is roasted to perfection and every cup is crafted with passion.
+                  Welcome to {process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind'}, where every single bean is roasted to perfection and every cup is crafted with passion.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-4 z-10">

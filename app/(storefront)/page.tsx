@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { MenuSquare, Coffee, CheckCircle, ArrowRight, X } from 'lucide-react';
+import { MenuSquare, Coffee, CheckCircle, ArrowRight, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 
 export default function Home() {
@@ -72,6 +72,33 @@ export default function Home() {
       default: return status;
     }
   };
+
+  const handleNextImage = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!selectedImage || galleryImages.length === 0) return;
+    const currentIndex = galleryImages.indexOf(selectedImage);
+    const nextIndex = (currentIndex + 1) % galleryImages.length;
+    setSelectedImage(galleryImages[nextIndex]);
+  }, [selectedImage, galleryImages]);
+
+  const handlePrevImage = useCallback((e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!selectedImage || galleryImages.length === 0) return;
+    const currentIndex = galleryImages.indexOf(selectedImage);
+    const prevIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+    setSelectedImage(galleryImages[prevIndex]);
+  }, [selectedImage, galleryImages]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedImage) return;
+      if (e.key === 'ArrowRight') handleNextImage();
+      if (e.key === 'ArrowLeft') handlePrevImage();
+      if (e.key === 'Escape') setSelectedImage(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedImage, handleNextImage, handlePrevImage]);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -220,23 +247,57 @@ export default function Home() {
           onClick={() => setSelectedImage(null)}
         >
           <div
-              className="relative max-w-5xl w-full h-full flex items-center justify-center"
+              className="relative max-w-5xl h-full flex items-center justify-center group self-center"
               onClick={(e) => e.stopPropagation()}
           >
+            {/* Desktop Previous Button */}
+            <button 
+              className="absolute left-4 md:-left-16 text-white/50 hover:text-white transition-all p-3 bg-white/5 hover:bg-white/20 rounded-full z-10 hidden sm:block scale-90 md:scale-100"
+              onClick={handlePrevImage}
+            >
+              <ChevronLeft size={40} />
+            </button>
+
             <img
                 src={getImageUrl(selectedImage)}
                 alt="Gallery Preview"
-                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300 p-4"
             />
+
+            {/* Desktop Next Button */}
+            <button 
+              className="absolute right-4 md:-right-16 text-white/50 hover:text-white transition-all p-3 bg-white/5 hover:bg-white/20 rounded-full z-10 hidden sm:block scale-90 md:scale-100"
+              onClick={handleNextImage}
+            >
+              <ChevronRight size={40} />
+            </button>
           </div>
+
+          {/* Mobile Navigation Buttons */}
+          <div className="absolute bottom-8 flex gap-8 items-center justify-center w-full z-10 sm:hidden">
+            <button 
+              className="text-white hover:text-primary transition-colors p-4 bg-white/10 hover:bg-white/20 rounded-full active:scale-95"
+              onClick={handlePrevImage}
+            >
+              <ChevronLeft size={32} />
+            </button>
+            <button 
+              className="text-white hover:text-primary transition-colors p-4 bg-white/10 hover:bg-white/20 rounded-full active:scale-95"
+              onClick={handleNextImage}
+            >
+              <ChevronRight size={32} />
+            </button>
+          </div>
+
+          {/* Close Button */}
           <button 
-            className="absolute top-6 right-6 text-white hover:text-primary transition-colors p-2 bg-white/10 rounded-full"
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-white/70 hover:text-white transition-colors p-3 bg-black/50 hover:bg-black/80 rounded-full z-50 backdrop-blur-sm shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedImage(null);
             }}
           >
-            <X size={32} />
+            <X size={28} />
           </button>
         </div>
       )}

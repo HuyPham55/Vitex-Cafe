@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Play, Heart, Gift, Volume2, Info, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Play, Heart, Volume2 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 import { motion } from 'framer-motion';
 
@@ -18,6 +18,12 @@ export default function AsmrPage() {
   const [videos, setVideos] = useState<AsmrVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<AsmrVideo | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [settings, setSettings] = useState({
+    asmrTitle: 'ASMR Brews',
+    asmrDescription: 'Immerse yourself in the rhythmic symphony of coffee craftsmanship. From the gentle hiss of steam to the crunch of freshly ground beans.'
+  });
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -33,7 +39,22 @@ export default function AsmrPage() {
         setLoading(false);
       }
     };
+    const getSettings = async () => {
+      try {
+        const data = await fetchAPI(endpoints.settings);
+        if (data) {
+          setSettings({
+            asmrTitle: data.asmrTitle || 'ASMR Brews',
+            asmrDescription: data.asmrDescription || 'Immerse yourself in the rhythmic symphony of coffee craftsmanship. From the gentle hiss of steam to the crunch of freshly ground beans.'
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      }
+    };
+
     loadVideos();
+    getSettings();
   }, []);
 
   const handleAppreciate = async (videoId: string) => {
@@ -41,7 +62,7 @@ export default function AsmrPage() {
       const result = await fetchAPI(`${endpoints.asmr}/${videoId}/appreciate`, {
         method: 'POST',
       });
-      
+
       setVideos((prev) =>
         prev.map((v) =>
           v._id === videoId ? { ...v, appreciationCount: result.appreciationCount } : v
@@ -53,6 +74,17 @@ export default function AsmrPage() {
       }
     } catch (err) {
       console.error('Failed to appreciate:', err);
+    }
+  };
+
+  const togglePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
     }
   };
 
@@ -75,7 +107,7 @@ export default function AsmrPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-slate-900 dark:text-slate-100 text-4xl md:text-5xl font-black tracking-tight"
           >
-            ASMR Brews
+            {settings.asmrTitle}
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -83,42 +115,59 @@ export default function AsmrPage() {
             transition={{ delay: 0.1 }}
             className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl"
           >
-            Immerse yourself in the rhythmic symphony of coffee craftsmanship. From the gentle hiss of steam to the crunch of freshly ground beans.
+            {settings.asmrDescription}
           </motion.p>
         </div>
 
         {activeVideo ? (
           <div className="relative group overflow-hidden rounded-2xl bg-slate-900 aspect-video w-full shadow-2xl border border-white/10">
             {/* Video Player */}
-            <video 
-              key={activeVideo.videoUrl} 
+            <video
+              ref={videoRef}
+              key={activeVideo.videoUrl}
               src={getImageUrl(activeVideo.videoUrl)}
-              className="absolute inset-0 w-full h-full object-cover"
-              controls
+              className="absolute inset-0 w-full h-full"
               autoPlay
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
             />
+
+            {/* Clickable overlay to toggle play/pause */}
+            <div
+              className="absolute inset-0 z-10 cursor-pointer"
+              onClick={togglePlayPause}
+            />
+
+            {/* Centered Play/Pause Button */}
+            <div
+              className={`absolute inset-0 flex items-center justify-center z-20 pointer-events-none transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+            >
+              <button
+                className="size-20 md:size-24 bg-primary/90 backdrop-blur-md text-white rounded-full flex items-center justify-center shadow-2xl shadow-primary/40 pointer-events-auto hover:bg-primary hover:scale-110 transition-all"
+                onClick={togglePlayPause}
+              >
+                <Play className="size-10 md:size-12 fill-white ml-1" />
+              </button>
+            </div>
+
             <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent pointer-events-none"></div>
-            
-            <div className="absolute bottom-0 inset-x-0 p-6 md:p-10 pointer-events-none">
+
+            <div className="absolute bottom-0 inset-x-0 p-6 md:p-10 pointer-events-none z-30">
               <div className="flex justify-between items-end pointer-events-auto">
                 <div className="max-w-[70%]">
                   <span className="bg-primary/90 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest uppercase mb-3 inline-block">
-                    Now Playing
+                    {isPlaying ? 'Now Playing' : 'Paused'}
                   </span>
                   <h2 className="text-white text-2xl md:text-4xl font-black mb-2">{activeVideo.title}</h2>
                   <p className="text-slate-300 text-sm md:text-base line-clamp-2">{activeVideo.description}</p>
                 </div>
                 <div className="flex gap-4">
-                  <button 
+                  <button
                     onClick={() => handleAppreciate(activeVideo._id)}
                     className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-white transition-all border border-white/20 group/btn"
                   >
                     <Heart className={`size-5 transition-transform group-hover/btn:scale-125 ${activeVideo.appreciationCount > 0 ? 'fill-primary text-primary' : ''}`} />
                     <span className="font-bold">{activeVideo.appreciationCount}</span>
-                  </button>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/30">
-                    <Gift className="size-5" />
-                    <span className="font-bold">Appreciate</span>
                   </button>
                 </div>
               </div>
@@ -149,7 +198,7 @@ export default function AsmrPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {videos.map((video) => (
-            <motion.div 
+            <motion.div
               layout
               key={video._id}
               className={`group flex flex-col gap-4 bg-white dark:bg-white/5 p-4 rounded-2xl border-2 transition-all cursor-pointer ${activeVideo?._id === video._id ? 'border-primary' : 'border-transparent hover:border-primary/20 hover:shadow-xl'}`}

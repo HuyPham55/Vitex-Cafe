@@ -15,6 +15,7 @@ export default function AsmrManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -121,6 +122,49 @@ export default function AsmrManagement() {
     }
   };
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null);
+      return;
+    }
+
+    const updatedVideos = [...videos];
+    const [movedItem] = updatedVideos.splice(draggedIndex, 1);
+    updatedVideos.splice(index, 0, movedItem);
+
+    // Update local state immediately for smooth UI
+    const finalVideos = updatedVideos.map((v, i) => ({ ...v, order: i }));
+    setVideos(finalVideos);
+    setDraggedIndex(null);
+
+    // Persist to backend
+    try {
+      await Promise.all(
+        finalVideos.map((video) =>
+          fetchAPI(`${endpoints.asmr}/${video._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ order: video.order })
+          })
+        )
+      );
+    } catch (error) {
+      console.error('Failed to update video order:', error);
+      getVideos(); // Rollback on error
+    }
+  };
+
   if (loading && videos.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -145,9 +189,16 @@ export default function AsmrManagement() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {videos.map((video) => (
-          <div key={video._id} className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-4 flex items-center gap-6 shadow-sm group">
-            <div className="flex-shrink-0 cursor-move text-slate-300">
+        {videos.sort((a, b) => a.order - b.order).map((video, index) => (
+          <div 
+            key={video._id} 
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop(index)}
+            className={`bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-4 flex items-center gap-6 shadow-sm group transition-all ${draggedIndex === index ? 'opacity-50 scale-[0.98] border-primary/30' : 'hover:border-primary/20'}`}
+          >
+            <div className="flex-shrink-0 cursor-move text-slate-300 hover:text-primary transition-colors">
               <GripVertical className="size-5" />
             </div>
             

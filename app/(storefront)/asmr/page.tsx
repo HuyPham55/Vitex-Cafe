@@ -20,6 +20,10 @@ export default function AsmrPage() {
   const [activeVideo, setActiveVideo] = useState<AsmrVideo | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [settings, setSettings] = useState({
+    asmrTitle: 'ASMR Brews',
+    asmrDescription: 'Immerse yourself in the rhythmic symphony of coffee craftsmanship. From the gentle hiss of steam to the crunch of freshly ground beans.'
+  });
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -35,7 +39,22 @@ export default function AsmrPage() {
         setLoading(false);
       }
     };
+    const getSettings = async () => {
+      try {
+        const data = await fetchAPI(endpoints.settings);
+        if (data) {
+          setSettings({
+            asmrTitle: data.asmrTitle || 'ASMR Brews',
+            asmrDescription: data.asmrDescription || 'Immerse yourself in the rhythmic symphony of coffee craftsmanship. From the gentle hiss of steam to the crunch of freshly ground beans.'
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      }
+    };
+
     loadVideos();
+    getSettings();
   }, []);
 
   const handleAppreciate = async (videoId: string) => {
@@ -83,20 +102,20 @@ export default function AsmrPage() {
       {/* Hero Section */}
       <section className="w-full mb-12">
         <div className="flex flex-col gap-2 mb-8">
-          <motion.h1
+          <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-slate-900 dark:text-slate-100 text-4xl md:text-5xl font-black tracking-tight"
           >
-            ASMR Brews
+            {settings.asmrTitle}
           </motion.h1>
-          <motion.p
+          <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl"
           >
-            Immerse yourself in the rhythmic symphony of coffee craftsmanship. From the gentle hiss of steam to the crunch of freshly ground beans.
+            {settings.asmrDescription}
           </motion.p>
         </div>
 

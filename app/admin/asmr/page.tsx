@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   Plus, Search, Edit2, Trash2, Video,
-  Check, X, Loader2, Eye, EyeOff, GripVertical, Upload
+  Check, X, Loader2, Eye, EyeOff, GripVertical, Upload, Save, Settings
 } from 'lucide-react';
 import { fetchAPI, endpoints } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -16,6 +16,9 @@ export default function AsmrManagement() {
   const [editingVideo, setEditingVideo] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [asmrSettings, setAsmrSettings] = useState({ title: '', description: '' });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -41,8 +44,48 @@ export default function AsmrManagement() {
   };
 
   useEffect(() => {
-    if (token) getVideos();
+    if (token) {
+      getVideos();
+      getSettings();
+    }
   }, [token]);
+
+  const getSettings = async () => {
+    try {
+      const data = await fetchAPI(endpoints.settings);
+      setAsmrSettings({
+        title: data.asmrTitle || 'ASMR Brews',
+        description: data.asmrDescription || ''
+      });
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    setSettingsSuccess(false);
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append('asmrTitle', asmrSettings.title);
+      formDataObj.append('asmrDescription', asmrSettings.description);
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${endpoints.settings}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataObj
+      });
+
+      if (!res.ok) throw new Error('Failed to save settings');
+      
+      setSettingsSuccess(true);
+      setTimeout(() => setSettingsSuccess(false), 3000);
+    } catch (error: any) {
+      alert(error.message || 'Failed to save settings');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleOpenModal = (video: any = null) => {
     if (video) {
@@ -381,6 +424,55 @@ export default function AsmrManagement() {
           </div>
         </div>
       )}
+
+      {/* ASMR Page Content Settings Section */}
+      <div className="mt-16 bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl p-8 shadow-sm">
+        <div className="flex items-center gap-3 mb-8 border-b border-primary/5 pb-4">
+          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-lg">
+            <Settings className="size-5" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Storefront Display Settings</h3>
+        </div>
+
+        <div className="space-y-6 max-w-2xl">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Section Title</label>
+            <input
+              type="text"
+              className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-4 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+              value={asmrSettings.title}
+              onChange={e => setAsmrSettings({ ...asmrSettings, title: e.target.value })}
+              placeholder="ASMR Brews"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Section Description</label>
+            <textarea
+              rows={3}
+              className="w-full bg-slate-50 dark:bg-background-dark border border-primary/10 rounded-xl px-4 py-4 text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary transition-all resize-none leading-relaxed"
+              value={asmrSettings.description}
+              onChange={e => setAsmrSettings({ ...asmrSettings, description: e.target.value })}
+              placeholder="Describe the ASMR section..."
+            ></textarea>
+          </div>
+
+          <div className="pt-4 flex items-center gap-4">
+            <button
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+              className="px-8 py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70"
+            >
+              {savingSettings ? <Loader2 className="animate-spin size-5" /> : <Save className="size-5" />}
+              Save Page Content
+            </button>
+            {settingsSuccess && (
+              <span className="text-green-600 font-bold text-sm flex items-center gap-1 animate-in fade-in">
+                <Check className="size-4" /> Changes saved!
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -93,7 +93,7 @@ export default function AsmrPage() {
             <video 
               key={activeVideo.videoUrl} 
               src={getImageUrl(activeVideo.videoUrl)}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full"
               controls
               autoPlay
             />

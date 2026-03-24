@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
     Coffee, Droplets, Snowflake, Cuboid, User,
     FileEdit, ShoppingCart, Star, MessageSquare, Camera,
-    Plus, Minus, Check, Loader2, Image as ImageIcon, X, Info
+    Plus, Minus, Check, Loader2, Image as ImageIcon, X, Info, Clock, AlertTriangle
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 
@@ -30,6 +30,10 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+    const [openTime, setOpenTime] = useState('08:00');
+    const [closeTime, setCloseTime] = useState('22:00');
+
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     useEffect(() => {
         const getData = async () => {
@@ -42,6 +46,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 setProduct(prodData);
                 setReviews(reviewsData);
                 setCurrencySymbol(settings.currencySymbol || '$');
+                setOpenTime(settings.openTime || '08:00');
+                setCloseTime(settings.closeTime || '22:00');
 
                 // Initialize default variants
                 const defaults: Record<string, any> = {};
@@ -77,6 +83,43 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const totalPrice = product
         ? (product.price + Object.values(selectedVariants).reduce((acc, curr) => acc + curr.priceModifier, 0)) * quantity
         : 0;
+
+    const getProductAvailability = () => {
+        if (!product) return { available: true, nextDay: '', nextDate: '' };
+        const availableDays: number[] = product.availableDays ?? [1, 2, 3, 4, 5];
+        const now = new Date();
+        const currentDay = now.getDay();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const [openH, openM] = openTime.split(':').map(Number);
+        const [closeH, closeM] = closeTime.split(':').map(Number);
+        const openMinutes = openH * 60 + openM;
+        const closeMinutes = closeH * 60 + closeM;
+
+        const isAvailableNow = availableDays.includes(currentDay)
+            && currentMinutes >= openMinutes
+            && currentMinutes <= closeMinutes;
+
+        if (isAvailableNow) return { available: true, nextDay: '', nextDate: '' };
+
+        for (let offset = 0; offset <= 7; offset++) {
+            const checkDay = (currentDay + offset) % 7;
+            if (availableDays.includes(checkDay)) {
+                if (offset === 0 && currentMinutes > closeMinutes) continue;
+                if (offset === 0 && currentMinutes < openMinutes) {
+                    const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    return { available: false, nextDay: 'Today at ' + openTime, nextDate: dateStr };
+                }
+                const nextDate = new Date(now);
+                nextDate.setDate(nextDate.getDate() + offset);
+                const dateStr = nextDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                return { available: false, nextDay: DAY_NAMES[checkDay], nextDate: dateStr };
+            }
+        }
+        return { available: false, nextDay: 'N/A', nextDate: '' };
+    };
+
+    const availability = product ? getProductAvailability() : { available: true, nextDay: '', nextDate: '' };
 
     const handleOrder = async () => {
         if (!customerName.trim()) {
@@ -298,6 +341,19 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             </div>
                         </div>
 
+                        {/* Pre-order Warning */}
+                        {product.inStock && !availability.available && (
+                            <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                                <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-amber-800 dark:text-amber-200 font-bold text-sm">Not available right now</p>
+                                    <p className="text-amber-700 dark:text-amber-300 text-xs mt-1">
+                                        This item is not available at the moment. If you pre-order, it will be delivered on <strong>{availability.nextDate}</strong>.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Add to Cart */}
                         <div className="flex items-center gap-4 pt-4">
                             <div className="flex items-center justify-between bg-background-light dark:bg-background-dark border border-primary/20 rounded-xl px-4 py-2 w-32">
@@ -314,10 +370,21 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             <button
                                 onClick={handleOrder}
                                 disabled={isSubmittingOrder || !product.inStock}
-                                className="flex-1 flex items-center justify-center gap-2 bg-primary text-white rounded-xl p-4 font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                className={`flex-1 flex items-center justify-center gap-2 rounded-xl p-4 font-bold shadow-lg transition-colors disabled:opacity-50 ${
+                                    !product.inStock
+                                        ? 'bg-slate-400 text-white shadow-slate-400/30'
+                                        : !availability.available
+                                            ? 'bg-amber-500 text-white shadow-amber-500/30 hover:bg-amber-600'
+                                            : 'bg-primary text-white shadow-primary/30 hover:bg-primary/90'
+                                }`}
                             >
-                                {isSubmittingOrder ? <Loader2 className="animate-spin size-5" /> : <ShoppingCart className="size-5" />}
-                                {product.inStock ? `Add to Order - ${formatPrice(totalPrice)}${currencySymbol}` : 'Out of Stock'}
+                                {isSubmittingOrder ? <Loader2 className="animate-spin size-5" /> : !availability.available ? <Clock className="size-5" /> : <ShoppingCart className="size-5" />}
+                                {!product.inStock
+                                    ? 'Out of Stock'
+                                    : !availability.available
+                                        ? `Pre-Order - ${formatPrice(totalPrice)}${currencySymbol}`
+                                        : `Add to Order - ${formatPrice(totalPrice)}${currencySymbol}`
+                                }
                             </button>
                         </div>
                     </div>

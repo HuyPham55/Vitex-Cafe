@@ -24,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind';
   const faviconUrl = settings?.favicon ? getImageUrl(settings.favicon) : '/favicon.ico';
   const logoUrl = settings?.logo ? getImageUrl(settings.logo) : '/favicon.ico';
+  const seoImageUrl = settings?.seoImage ? getImageUrl(settings.seoImage) : logoUrl;
   const description = settings?.footerDescription || 'Experience the Perfect Brew';
 
   return {
@@ -41,10 +42,10 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: siteName,
       images: [
         {
-          url: logoUrl,
+          url: seoImageUrl,
           width: 1200,
           height: 630,
-          alt: `${siteName} Logo`,
+          alt: `${siteName} SEO Image`,
         },
       ],
       type: 'website',
@@ -53,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title: siteName,
       description: description,
-      images: [logoUrl],
+      images: [seoImageUrl],
     },
   };
 }

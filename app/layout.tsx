@@ -23,15 +23,37 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'The Daily Grind';
   const faviconUrl = settings?.favicon ? getImageUrl(settings.favicon) : '/favicon.ico';
+  const logoUrl = settings?.logo ? getImageUrl(settings.logo) : '/favicon.ico';
+  const description = settings?.footerDescription || 'Experience the Perfect Brew';
 
   return {
     title: {
       default: siteName,
       template: `%s | ${siteName}`,
     },
-    description: 'Experience the Perfect Brew',
+    description: description,
     icons: {
       icon: faviconUrl,
+    },
+    openGraph: {
+      title: siteName,
+      description: description,
+      siteName: siteName,
+      images: [
+        {
+          url: logoUrl,
+          width: 1200,
+          height: 630,
+          alt: `${siteName} Logo`,
+        },
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteName,
+      description: description,
+      images: [logoUrl],
     },
   };
 }

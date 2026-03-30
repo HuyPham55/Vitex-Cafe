@@ -30,6 +30,10 @@ export default function StoreSettings() {
     const [newFavicon, setNewFavicon] = useState<File | null>(null);
     const [removeFavicon, setRemoveFavicon] = useState(false);
 
+    const [existingSeoImage, setExistingSeoImage] = useState<string | null>(null);
+    const [newSeoImage, setNewSeoImage] = useState<File | null>(null);
+    const [removeSeoImage, setRemoveSeoImage] = useState(false);
+
     const [formData, setFormData] = useState({
         openTime: '08:00',
         closeTime: '22:00',
@@ -67,6 +71,10 @@ export default function StoreSettings() {
             setExistingFavicon(data.favicon || null);
             setRemoveFavicon(false);
             setNewFavicon(null);
+
+            setExistingSeoImage(data.seoImage || null);
+            setRemoveSeoImage(false);
+            setNewSeoImage(null);
         } catch (error) {
             console.error('Failed to fetch settings:', error);
         } finally {
@@ -144,6 +152,12 @@ export default function StoreSettings() {
                 formDataObj.append('favicon', newFavicon);
             } else if (removeFavicon) {
                 formDataObj.append('removeFavicon', 'true');
+            }
+
+            if (newSeoImage) {
+                formDataObj.append('seoImage', newSeoImage);
+            } else if (removeSeoImage) {
+                formDataObj.append('removeSeoImage', 'true');
             }
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${endpoints.settings}`, {
@@ -307,6 +321,61 @@ export default function StoreSettings() {
                             </div>
                         </div>
                         
+                        {/* SEO Image Upload */}
+                        <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/5">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Default SEO Image</label>
+                            <div className="flex flex-col gap-4">
+                                {(existingSeoImage && !removeSeoImage) ? (
+                                    <div className="relative h-48 w-full max-w-[400px] rounded-xl overflow-hidden border border-primary/20 shadow-sm bg-slate-50 dark:bg-slate-800">
+                                        <img
+                                            src={getImageUrl(existingSeoImage)}
+                                            alt="SEO Image"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setRemoveSeoImage(true)}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    </div>
+                                ) : newSeoImage ? (
+                                    <div className="relative h-48 w-full max-w-[400px] rounded-xl overflow-hidden border border-primary/20 shadow-sm bg-slate-50 dark:bg-slate-800">
+                                        <img
+                                            src={URL.createObjectURL(newSeoImage)}
+                                            alt="Preview SEO Image"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewSeoImage(null)}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label className="h-48 w-full max-w-[400px] border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center text-primary/50 cursor-pointer hover:bg-primary/5 transition-all group">
+                                        <span className="font-bold text-2xl group-hover:scale-110 transition-transform">+</span>
+                                        <span className="text-[10px] uppercase font-bold mt-1 text-center px-2">Upload SEO Image</span>
+                                        <input
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setNewSeoImage(e.target.files[0]);
+                                                    setRemoveSeoImage(false);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                )}
+                                <p className="text-[10px] text-slate-400 italic">This image is shown when you share the homepage link on social media.<br/>Format: <strong>JPG, PNG, or WEBP</strong>. Resolution: <strong>1200x630px</strong> for best results.</p>
+                            </div>
+                        </div>
+
                         {/* Footer Description */}
                         <div className="md:col-span-2 space-y-4 pt-4 border-t border-primary/5">
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Footer Description</label>

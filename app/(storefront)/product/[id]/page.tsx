@@ -121,6 +121,15 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
     const availability = product ? getProductAvailability() : { available: true, nextDay: '', nextDate: '' };
 
+    const formatTime12h = (time24: string) => {
+        if (!time24) return '';
+        const [h, m] = time24.split(':');
+        const hour = parseInt(h, 10);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `${hour12}.${m}${ampm}`;
+    };
+
     const handleOrder = async () => {
         if (!customerName.trim()) {
             alert('Please enter your name');
@@ -348,7 +357,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                 <div>
                                     <p className="text-amber-800 dark:text-amber-200 font-bold text-sm">Not available right now</p>
                                     <p className="text-amber-700 dark:text-amber-300 text-xs mt-1">
-                                        This item is not available at the moment. If you pre-order, it will be delivered on <strong>{availability.nextDate}</strong>.
+                                        This item is not available at the moment. If you pre-order, it will be delivered on <strong>{availability.nextDate}</strong>, from {formatTime12h(openTime)} to {formatTime12h(closeTime)}.
                                     </p>
                                 </div>
                             </div>

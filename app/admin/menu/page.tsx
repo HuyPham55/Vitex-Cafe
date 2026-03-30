@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   Plus, Search, Edit2, Trash2, Coffee,
   Check, X, Loader2, Package, Tag, Layers,
-  ChevronUp, ChevronDown
+  ChevronUp, ChevronDown, Calendar
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -20,6 +20,8 @@ export default function MenuManagement() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -29,7 +31,8 @@ export default function MenuManagement() {
     imageUrl: '',
     inStock: true,
     order: 0,
-    variantTypes: [] as string[]
+    variantTypes: [] as string[],
+    availableDays: [1, 2, 3, 4, 5] as number[]
   });
 
   const getData = async () => {
@@ -64,7 +67,8 @@ export default function MenuManagement() {
         imageUrl: product.imageUrl || '',
         inStock: product.inStock,
         order: product.order || 0,
-        variantTypes: product.variantTypes?.map((vt: any) => vt._id || vt) || []
+        variantTypes: product.variantTypes?.map((vt: any) => vt._id || vt) || [],
+        availableDays: product.availableDays ?? [1, 2, 3, 4, 5]
       });
     } else {
       setEditingProduct(null);
@@ -76,7 +80,8 @@ export default function MenuManagement() {
         imageUrl: '',
         inStock: true,
         order: products.length > 0 ? Math.max(...products.map(p => p.order || 0)) + 1 : 0,
-        variantTypes: []
+        variantTypes: [],
+        availableDays: [1, 2, 3, 4, 5]
       });
     }
     setImageFile(null);
@@ -101,6 +106,7 @@ export default function MenuManagement() {
       data.append('inStock', formData.inStock.toString());
       data.append('order', formData.order.toString());
       data.append('variantTypes', JSON.stringify(formData.variantTypes));
+      data.append('availableDays', JSON.stringify(formData.availableDays));
       
       if (imageFile) {
         data.append('image', imageFile);
@@ -258,6 +264,15 @@ export default function MenuManagement() {
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg">{product.name}</h3>
                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">{product.category}</span>
+                  <div className="flex gap-0.5 mt-1">
+                    {DAY_LABELS.map((d, i) => (
+                      <span key={i} className={`text-[8px] w-5 h-4 flex items-center justify-center rounded font-bold ${
+                        (product.availableDays ?? [1,2,3,4,5]).includes(i)
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600'
+                      }`}>{d[0]}</span>
+                    ))}
+                  </div>
                 </div>
                 <p className="font-black text-primary text-lg">{formatPrice(product.price)}{currencySymbol}</p>
               </div>
@@ -406,6 +421,36 @@ export default function MenuManagement() {
                       onChange={e => setFormData({ ...formData, description: e.target.value })}
                     ></textarea>
                   </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Calendar className="size-3" /> Available Days
+                </label>
+                <div className="flex gap-2">
+                  {DAY_LABELS.map((day, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        const exists = formData.availableDays.includes(i);
+                        setFormData({
+                          ...formData,
+                          availableDays: exists
+                            ? formData.availableDays.filter(d => d !== i)
+                            : [...formData.availableDays, i].sort()
+                        });
+                      }}
+                      className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                        formData.availableDays.includes(i)
+                          ? 'bg-green-500/10 border-green-500 text-green-600 dark:text-green-400'
+                          : 'bg-slate-50 dark:bg-white/5 border-primary/5 text-slate-400'
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  ))}
                 </div>
               </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Coffee, IceCream, Search } from 'lucide-react';
+import { Coffee, IceCream, Search, Clock } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 
 export default function Menu() {
@@ -10,6 +10,41 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [currencySymbol, setCurrencySymbol] = useState('$');
   const [searchQuery, setSearchQuery] = useState('');
+  const [openTime, setOpenTime] = useState('08:00');
+  const [closeTime, setCloseTime] = useState('22:00');
+
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  const getProductAvailability = (product: any) => {
+    const availableDays: number[] = product.availableDays ?? [1, 2, 3, 4, 5];
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const [openH, openM] = openTime.split(':').map(Number);
+    const [closeH, closeM] = closeTime.split(':').map(Number);
+    const openMinutes = openH * 60 + openM;
+    const closeMinutes = closeH * 60 + closeM;
+
+    const isAvailableNow = availableDays.includes(currentDay)
+      && currentMinutes >= openMinutes
+      && currentMinutes <= closeMinutes;
+
+    if (isAvailableNow) return { available: true, nextDay: '' };
+
+    // Find next available day
+    for (let offset = 0; offset <= 7; offset++) {
+      const checkDay = (currentDay + offset) % 7;
+      if (availableDays.includes(checkDay)) {
+        if (offset === 0 && currentMinutes > closeMinutes) continue;
+        if (offset === 0 && currentMinutes < openMinutes) {
+          return { available: false, nextDay: 'Today at ' + openTime };
+        }
+        return { available: false, nextDay: DAY_NAMES[checkDay] };
+      }
+    }
+    return { available: false, nextDay: 'N/A' };
+  };
 
   useEffect(() => {
     const getProducts = async () => {
@@ -20,6 +55,8 @@ export default function Menu() {
         ]);
         setProducts(data);
         setCurrencySymbol(settings.currencySymbol || '$');
+        setOpenTime(settings.openTime || '08:00');
+        setCloseTime(settings.closeTime || '22:00');
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {
@@ -90,7 +127,9 @@ export default function Menu() {
                     <h2 className="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight tracking-tight">{category}</h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-2">
-                    {categoryProducts.map((product) => (
+                    {categoryProducts.map((product) => {
+                      const { available, nextDay } = getProductAvailability(product);
+                      return (
                       <Link
                         href={`/product/${product._id}`}
                         key={product._id}
@@ -101,8 +140,14 @@ export default function Menu() {
                             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Out of Stock</span>
                           </div>
                         )}
+                        {product.inStock && !available && (
+                          <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-amber-500/90 text-white px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md backdrop-blur-sm">
+                            <Clock className="size-3" />
+                            Next: {nextDay}
+                          </div>
+                        )}
                         <div
-                          className="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover transition-transform group-hover:scale-105"
+                          className={`w-full bg-center bg-no-repeat aspect-[4/3] bg-cover transition-transform group-hover:scale-105 ${product.inStock && !available ? 'opacity-70' : ''}`}
                           style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
                         ></div>
                         <div className="px-4 py-2">
@@ -113,7 +158,8 @@ export default function Menu() {
                           <p className="text-slate-500 dark:text-slate-400 text-sm font-normal line-clamp-2">{product.description}</p>
                         </div>
                       </Link>
-                    ))}
+                    );
+                    })}
                   </div>
                 </section>
               );

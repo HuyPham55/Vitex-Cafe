@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import {
     Search, Filter, History, Coffee, CheckCircle,
-    XCircle, Clock, MoreVertical, CreditCard, Loader2
+    XCircle, Clock, MoreVertical, CreditCard, Loader2, Plus, Edit2
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import OrderModal from '@/components/OrderModal';
 
 export default function OrderManagement() {
     const { token } = useAuth();
@@ -14,6 +15,8 @@ export default function OrderManagement() {
     const [loading, setLoading] = useState(true);
     const [currencySymbol, setCurrencySymbol] = useState('$');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingOrder, setEditingOrder] = useState<any>(null);
 
     const getOrders = async () => {
         try {
@@ -64,6 +67,39 @@ export default function OrderManagement() {
         }
     };
 
+    const handleCreateOrder = async (orderData: any) => {
+        try {
+            await fetchAPI(`${endpoints.orders}/admin`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: JSON.stringify(orderData)
+            });
+            getOrders();
+        } catch (error: any) {
+            throw new Error(error.message || 'Failed to create order');
+        }
+    };
+
+    const handleUpdateOrderItems = async (orderData: any) => {
+        if (!editingOrder) return;
+        try {
+            await fetchAPI(`${endpoints.orders}/${editingOrder._id}/items`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                    items: orderData.items,
+                    note: orderData.note,
+                    total: orderData.total,
+                    customerName: orderData.customerName,
+                    isAnonymous: orderData.isAnonymous
+                })
+            });
+            getOrders();
+        } catch (error: any) {
+            throw new Error(error.message || 'Failed to update order');
+        }
+    };
+
     const filteredOrders = filterStatus === 'all'
         ? orders
         : orders.filter(o => o.status === filterStatus);
@@ -83,19 +119,27 @@ export default function OrderManagement() {
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Order Management</h2>
                     <p className="text-slate-500 dark:text-slate-400 text-sm">Monitor and process orders in real-time.</p>
                 </div>
-                <div className="flex gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-primary/10 overflow-x-auto no-scrollbar max-w-full">
-                    {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setFilterStatus(status)}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap ${filterStatus === status
-                                ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                : 'text-slate-500 hover:text-primary'
-                                }`}
-                        >
-                            {status}
-                        </button>
-                    ))}
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                        <Plus className="size-4" /> New Order
+                    </button>
+                    <div className="flex gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-primary/10 overflow-x-auto no-scrollbar max-w-full">
+                        {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => setFilterStatus(status)}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap ${filterStatus === status
+                                    ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                    : 'text-slate-500 hover:text-primary'
+                                    }`}
+                            >
+                                {status}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -155,7 +199,15 @@ export default function OrderManagement() {
                             </div>
 
                             <div className="flex flex-col gap-1">
-                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest text-center mb-1">Status</p>
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center flex-1">Status</p>
+                                    <button
+                                        onClick={() => setEditingOrder(order)}
+                                        className="p-1 px-2 text-primary hover:bg-primary/5 rounded font-bold text-[10px] flex items-center gap-1 transition-all"
+                                    >
+                                        <Edit2 className="size-3" /> Edit Items
+                                    </button>
+                                </div>
                                 <div className="flex justify-center gap-2">
                                     <select
                                         value={order.status}
@@ -205,6 +257,24 @@ export default function OrderManagement() {
                     </div>
                 )}
             </div>
+
+            {/* Modals */}
+            <OrderModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSave={handleCreateOrder}
+                currencySymbol={currencySymbol}
+            />
+
+            {editingOrder && (
+                <OrderModal
+                    isOpen={!!editingOrder}
+                    onClose={() => setEditingOrder(null)}
+                    onSave={handleUpdateOrderItems}
+                    initialData={editingOrder}
+                    currencySymbol={currencySymbol}
+                />
+            )}
         </div>
     );
 }

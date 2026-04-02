@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   Plus, Search, Edit2, Trash2, Coffee,
   Check, X, Loader2, Package, Tag, Layers,
-  ChevronUp, ChevronDown, Calendar
+  ChevronUp, ChevronDown, Calendar, Eye, EyeOff
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -38,7 +38,7 @@ export default function MenuManagement() {
   const getData = async () => {
     try {
       const [prodData, varData, settings] = await Promise.all([
-        fetchAPI(endpoints.products),
+        fetchAPI(`${endpoints.products}?showAll=true`),
         fetchAPI(endpoints.variants),
         fetchAPI(endpoints.settings)
       ]);
@@ -161,6 +161,18 @@ export default function MenuManagement() {
       alert(error.message || 'Failed to toggle stock');
     }
   };
+
+  const toggleHidden = async (product: any) => {
+    try {
+      await fetchAPI(`${endpoints.products}/${product._id}/toggle-hidden`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      getData();
+    } catch (error: any) {
+      alert(error.message || 'Failed to toggle visibility');
+    }
+  };
   
   const handleMoveOrder = async (product: any, direction: 'up' | 'down') => {
     const sortedProducts = [...products].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -224,13 +236,20 @@ export default function MenuManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <div key={product._id} className="bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl overflow-hidden shadow-sm flex flex-col group">
+          <div key={product._id} className={`bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl overflow-hidden shadow-sm flex flex-col group transition-opacity ${product.isHidden ? 'opacity-60' : ''}`}>
             <div className="relative aspect-[4/3] overflow-hidden">
               <img 
                 src={getImageUrl(product.imageUrl)} 
                 alt={product.name} 
                 className="w-full h-full object-cover transition-transform group-hover:scale-105" 
               />
+              {product.isHidden && (
+                <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                  <span className="flex items-center gap-1.5 bg-slate-800/90 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-sm">
+                    <EyeOff className="size-3" /> Hidden from Menu
+                  </span>
+                </div>
+              )}
               <div className="absolute top-3 right-3 flex gap-2 items-start">
                 <button
                   onClick={() => toggleStock(product)}
@@ -292,6 +311,17 @@ export default function MenuManagement() {
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-primary/10 hover:text-primary transition-all"
                 >
                   <Edit2 className="size-4" /> Edit
+                </button>
+                <button
+                  onClick={() => toggleHidden(product)}
+                  title={product.isHidden ? 'Show on Menu' : 'Hide from Menu'}
+                  className={`p-2.5 rounded-xl border transition-all ${
+                    product.isHidden
+                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
+                      : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-amber-100 dark:border-amber-900/40 hover:bg-amber-100'
+                  }`}
+                >
+                  {product.isHidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                 </button>
                 <button
                   onClick={() => handleDelete(product._id)}

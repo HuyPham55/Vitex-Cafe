@@ -5,6 +5,101 @@ import Link from 'next/link';
 import { Coffee, IceCream, Search, Clock, Star } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
 
+function MenuItemCard({ product, available, nextDay, review, currencySymbol }: { product: any, available: boolean, nextDay: string, review: any, currencySymbol: string }) {
+  const [hoverPosition, setHoverPosition] = useState<'top' | 'bottom'>('top');
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.top < 400) {
+      setHoverPosition('bottom');
+    } else {
+      setHoverPosition('top');
+    }
+  };
+
+  return (
+    <div className="menu-item-wrapper relative" onMouseEnter={handleMouseEnter}>
+      <Link
+        href={`/product/${product._id}`}
+        className="group flex flex-col gap-3 pb-4 bg-white dark:bg-slate-800/50 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
+      >
+        {!product.inStock && (
+          <div className="absolute inset-0 bg-white/60 dark:bg-black/60 z-10 flex items-center justify-center backdrop-blur-[2px]">
+            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Out of Stock</span>
+          </div>
+        )}
+        {product.inStock && !available && (
+          <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-amber-500/90 text-white px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md backdrop-blur-sm">
+            <Clock className="size-3" />
+            Next: {nextDay}
+          </div>
+        )}
+        <div
+          className={`w-full bg-center bg-no-repeat aspect-[4/3] bg-cover transition-transform group-hover:scale-105 ${product.inStock && !available ? 'opacity-70' : ''}`}
+          style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
+        ></div>
+        <div className="px-4 py-2">
+          <div className="flex justify-between items-start mb-1">
+            <p className="text-slate-900 dark:text-slate-100 text-base font-bold">{product.name}</p>
+            <p className="text-primary font-bold">{formatPrice(product.price)}{currencySymbol}</p>
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-normal line-clamp-2">{product.description}</p>
+        </div>
+      </Link>
+
+      {/* Desktop Hover Card */}
+      <div className={`hover-card hidden md:block absolute z-[60] left-1/2 -translate-x-1/2 ${hoverPosition === 'top' ? 'bottom-full mb-4' : 'top-full mt-4'} w-72 rounded-2xl shadow-2xl overflow-hidden border bg-white/80 dark:bg-slate-900/80 border-white/40 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]`}>
+        <div
+          className="h-32 bg-cover bg-center"
+          style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
+        ></div>
+        <div className="p-4">
+          <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{product.name}</h3>
+
+          {/* Star rating */}
+          <div className="flex items-center gap-1 my-1.5">
+            {review ? (
+              <>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      className={`size-3.5 text-primary ${s <= Math.round(review.avgRating) ? 'fill-current' : 'opacity-30'}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100 ml-0.5">{review.avgRating}</span>
+                <span className="text-xs text-slate-400">({review.reviewCount} {review.reviewCount === 1 ? 'review' : 'reviews'})</span>
+              </>
+            ) : (
+              <span className="text-xs text-slate-400 italic">No reviews yet</span>
+            )}
+          </div>
+
+          {/* Full description */}
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">{product.description}</p>
+
+          {/* Latest review */}
+          {review?.latestReview && (
+            <div className="bg-primary/5 dark:bg-primary/10 p-2 rounded-lg border-l-4 border-primary">
+              <p className="text-[11px] italic text-slate-700 dark:text-slate-300">
+                &ldquo;{review.latestReview.comment}&rdquo; — {review.latestReview.customerName}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Arrow element dependent on hoverPosition */}
+        {hoverPosition === 'top' ? (
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-r border-b bg-white/80 dark:bg-slate-900/80 border-white/40 dark:border-white/10"></div>
+        ) : (
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-l border-t bg-white/80 dark:bg-slate-900/80 border-white/40 dark:border-white/10"></div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Menu() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,82 +229,15 @@ export default function Menu() {
                       const { available, nextDay } = getProductAvailability(product);
                       const review = reviewSummaries[product._id];
                       return (
-                      <div key={product._id} className="menu-item-wrapper relative">
-                        <Link
-                          href={`/product/${product._id}`}
-                          className="group flex flex-col gap-3 pb-4 bg-white dark:bg-slate-800/50 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
-                        >
-                          {!product.inStock && (
-                            <div className="absolute inset-0 bg-white/60 dark:bg-black/60 z-10 flex items-center justify-center backdrop-blur-[2px]">
-                              <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Out of Stock</span>
-                            </div>
-                          )}
-                          {product.inStock && !available && (
-                            <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-amber-500/90 text-white px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md backdrop-blur-sm">
-                              <Clock className="size-3" />
-                              Next: {nextDay}
-                            </div>
-                          )}
-                          <div
-                            className={`w-full bg-center bg-no-repeat aspect-[4/3] bg-cover transition-transform group-hover:scale-105 ${product.inStock && !available ? 'opacity-70' : ''}`}
-                            style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
-                          ></div>
-                          <div className="px-4 py-2">
-                            <div className="flex justify-between items-start mb-1">
-                              <p className="text-slate-900 dark:text-slate-100 text-base font-bold">{product.name}</p>
-                              <p className="text-primary font-bold">{formatPrice(product.price)}{currencySymbol}</p>
-                            </div>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm font-normal line-clamp-2">{product.description}</p>
-                          </div>
-                        </Link>
-
-                        {/* Desktop Hover Card */}
-                        <div className="hover-card hidden md:block absolute z-[60] left-1/2 -translate-x-1/2 bottom-full mb-4 w-72 rounded-2xl shadow-2xl overflow-hidden border bg-white/80 dark:bg-slate-900/80 border-white/40 dark:border-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-                          <div
-                            className="h-32 bg-cover bg-center"
-                            style={{ backgroundImage: `url("${getImageUrl(product.imageUrl)}")` }}
-                          ></div>
-                          <div className="p-4">
-                            <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{product.name}</h3>
-
-                            {/* Star rating */}
-                            <div className="flex items-center gap-1 my-1.5">
-                              {review ? (
-                                <>
-                                  <div className="flex items-center gap-0.5">
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                      <Star
-                                        key={s}
-                                        className={`size-3.5 text-primary ${s <= Math.round(review.avgRating) ? 'fill-current' : 'opacity-30'}`}
-                                      />
-                                    ))}
-                                  </div>
-                                  <span className="text-sm font-bold text-slate-900 dark:text-slate-100 ml-0.5">{review.avgRating}</span>
-                                  <span className="text-xs text-slate-400">({review.reviewCount} {review.reviewCount === 1 ? 'review' : 'reviews'})</span>
-                                </>
-                              ) : (
-                                <span className="text-xs text-slate-400 italic">No reviews yet</span>
-                              )}
-                            </div>
-
-                            {/* Full description */}
-                            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">{product.description}</p>
-
-                            {/* Latest review */}
-                            {review?.latestReview && (
-                              <div className="bg-primary/5 dark:bg-primary/10 p-2 rounded-lg border-l-4 border-primary">
-                                <p className="text-[11px] italic text-slate-700 dark:text-slate-300">
-                                  &ldquo;{review.latestReview.comment}&rdquo; — {review.latestReview.customerName}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Bottom arrow */}
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-r border-b bg-white/80 dark:bg-slate-900/80 border-white/40 dark:border-white/10"></div>
-                        </div>
-                      </div>
-                    );
+                        <MenuItemCard
+                          key={product._id}
+                          product={product}
+                          available={available}
+                          nextDay={nextDay}
+                          review={review}
+                          currencySymbol={currencySymbol}
+                        />
+                      );
                     })}
                   </div>
                 </section>

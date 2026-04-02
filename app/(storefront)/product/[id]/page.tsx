@@ -43,6 +43,12 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     fetchAPI(`${endpoints.reviews}/${id}`),
                     fetchAPI(endpoints.settings)
                 ]);
+                // Treat hidden products as not found for customers
+                if (prodData.isHidden) {
+                    setProduct(null);
+                    setLoading(false);
+                    return;
+                }
                 setProduct(prodData);
                 setReviews(reviewsData);
                 setCurrencySymbol(settings.currencySymbol || '$');

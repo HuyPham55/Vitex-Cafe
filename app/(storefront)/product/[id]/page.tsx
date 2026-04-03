@@ -26,6 +26,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
     // Review form state
     const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [expandedReviews, setExpandedReviews] = useState<Record<string, boolean>>({});
     const [newReview, setNewReview] = useState({ rating: 5, comment: '', customerName: '' });
     const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -502,7 +503,19 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                                         ))}
                                     </div>
                                 </div>
-                                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-4">{review.comment}</p>
+                                <div className="mb-4">
+                                    <p className={`text-slate-600 dark:text-slate-400 text-sm ${expandedReviews[review._id] ? '' : 'line-clamp-4'}`}>
+                                        {review.comment}
+                                    </p>
+                                    {review.comment?.length > 180 && (
+                                        <button
+                                            onClick={() => setExpandedReviews(prev => ({ ...prev, [review._id]: !prev[review._id] }))}
+                                            className="text-primary text-xs font-bold hover:underline mt-1 focus:outline-none"
+                                        >
+                                            {expandedReviews[review._id] ? 'Show less' : 'Read more'}
+                                        </button>
+                                    )}
+                                </div>
                                 {review.photos?.length > 0 && (
                                     <div className="flex gap-2 mt-auto overflow-x-auto no-scrollbar pb-1">
                                         {review.photos.map((photo: string, i: number) => (

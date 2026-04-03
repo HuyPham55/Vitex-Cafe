@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { MenuSquare, Coffee, CheckCircle, ArrowRight, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MenuSquare, Coffee, CheckCircle, ArrowRight, X, ChevronLeft, ChevronRight, Star, MessageSquareQuote, ExternalLink } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 
 export default function Home() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const [heroImages, setHeroImages] = useState<string[]>([
     'https://lh3.googleusercontent.com/aida-public/AB6AXuBBS7MjMdfwCv1DqRLY5YHgD8XRyOsNHseJidVw67eg4s0rItgSTVEKs1YsCAoYPyzO4MsnykLv1Ktwepj6z-pXsx_F_gUztpAA9g2Jvle5oLF0RFSZD34YrTM3DrJdyFgwySZi28siaqS1kU72N9J-htErWvr_U7hWpIGhcY8BZqUHsY2FO8_8nSG44ZdLan2A0HmsJbQUQwIE0a5P8i9K9MdnetqR7OQKCkxIQf58JdmiReEQBGc7z6l4AzRtOIqi9hUKPgwX'
   ]);
@@ -43,6 +45,17 @@ export default function Home() {
 
     getOrders();
     getSettings();
+    const getReviews = async () => {
+      try {
+        const data = await fetchAPI(`${endpoints.reviews}/latest?limit=6`);
+        setReviews(data);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+    getReviews();
     const interval = setInterval(getOrders, 10000); // Polling every 10s
     return () => clearInterval(interval);
   }, []);
@@ -227,6 +240,55 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        {/* Customer Testimonials Section */}
+        <section className="mb-20 px-4">
+          <div className="flex flex-col gap-2 mb-8 text-center md:text-left">
+            <div className="flex items-center gap-3 justify-center md:justify-start">
+              <MessageSquareQuote className="text-primary size-8" />
+              <h2 className="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">Customer Voices</h2>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-2xl">
+              Don't just take our word for it. Hear what our community has to say about their daily ritual.
+            </p>
+          </div>
+
+          {reviewsLoading ? (
+            <div className="flex justify-center p-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center p-12 bg-white dark:bg-background-dark/40 rounded-xl border border-primary/10 text-slate-500">
+              No reviews yet. Be the first to leave one!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.map((review) => (
+                <div key={review._id} className="bg-white dark:bg-background-dark/40 border border-primary/10 p-6 rounded-2xl shadow-sm flex flex-col h-full hover:shadow-md transition-shadow group">
+                  <div className="flex items-center gap-1 text-primary mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`size-4 ${i < review.rating ? 'fill-current' : 'text-slate-300 dark:text-slate-700'}`} />
+                    ))}
+                  </div>
+                  <p className="text-slate-700 dark:text-slate-300 italic mb-6 flex-grow line-clamp-4 group-hover:line-clamp-none transition-all duration-300">
+                    "{review.comment}"
+                  </p>
+                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-primary/5">
+                    <div className="flex flex-col">
+                      <span className="text-slate-900 dark:text-slate-100 font-bold truncate max-w-[150px]">{review.customerName}</span>
+                      <Link href={`/product/${review.product?._id}`} className="text-primary text-xs font-semibold hover:underline mt-1 flex items-center gap-1">
+                        Reviewing: <span className="truncate max-w-[100px]">{review.product?.name}</span> <ExternalLink className="size-3" />
+                      </Link>
+                    </div>
+                    <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
+                      {review.customerName.substring(0, 2).toUpperCase()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* CTA Section */}
         <section className="bg-primary/5 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-primary/10">

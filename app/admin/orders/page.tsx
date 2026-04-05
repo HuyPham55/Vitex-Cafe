@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
     Search, Filter, History, Coffee, CheckCircle,
-    XCircle, Clock, MoreVertical, CreditCard, Loader2, Plus, Edit2
+    XCircle, Clock, MoreVertical, CreditCard, Loader2, Plus, Edit2, Ticket
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -193,6 +193,11 @@ export default function OrderManagement() {
                                     {order.note && (
                                         <p className="text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded mt-2 border border-orange-100 dark:border-orange-800">
                                             Note: {order.note}
+                                        </p>
+                                    )}
+                                    {order.discountCode && (
+                                        <p className="text-[10px] text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1.5 rounded mt-2 border border-emerald-100 dark:border-emerald-800 flex items-center gap-1 font-bold">
+                                            <Ticket className="size-3 shrink-0" /> Discount Used: {order.discountCode}
                                         </p>
                                     )}
                                 </div>

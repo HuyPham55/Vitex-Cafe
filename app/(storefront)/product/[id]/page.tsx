@@ -23,6 +23,12 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const [customerName, setCustomerName] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
     const [note, setNote] = useState('');
+    
+    // Discount state
+    const [discountCodeInput, setDiscountCodeInput] = useState('');
+    const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
+    const [discountError, setDiscountError] = useState('');
+    const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
 
     // Review form state
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -87,9 +93,18 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         setSelectedVariants(prev => ({ ...prev, [vtName]: option }));
     };
 
-    const totalPrice = product
+    const basePrice = product
         ? (product.price + Object.values(selectedVariants).reduce((acc, curr) => acc + curr.priceModifier, 0)) * quantity
         : 0;
+        
+    let totalPrice = basePrice;
+    if (appliedDiscount) {
+        if (appliedDiscount.discountType === 'percent') {
+            totalPrice = basePrice * (1 - appliedDiscount.value / 100);
+        } else {
+            totalPrice = Math.max(0, basePrice - appliedDiscount.value);
+        }
+    }
 
     const getProductAvailability = () => {
         if (!product) return { available: true, nextDay: '', nextDate: '' };
@@ -137,6 +152,24 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         return `${hour12}.${m}${ampm}`;
     };
 
+    const handleApplyDiscount = async () => {
+        if (!discountCodeInput.trim()) return;
+        setIsValidatingDiscount(true);
+        setDiscountError('');
+        try {
+            const res = await fetchAPI(endpoints.discounts + '/validate', {
+                method: 'POST',
+                body: JSON.stringify({ code: discountCodeInput, productId: id }) // product id
+            });
+            setAppliedDiscount(res);
+        } catch (error: any) {
+            setDiscountError(error.message || 'Invalid code');
+            setAppliedDiscount(null);
+        } finally {
+            setIsValidatingDiscount(false);
+        }
+    };
+
     const handleOrder = async () => {
         if (!customerName.trim()) {
             alert('Please enter your name');
@@ -162,7 +195,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 }],
                 note,
                 total: totalPrice,
-                isAnonymous
+                isAnonymous,
+                discountCode: appliedDiscount ? appliedDiscount.code : undefined
             };
 
             const result = await fetchAPI(endpoints.orders, {
@@ -370,8 +404,51 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                             </div>
                         )}
 
+                        {/* Discount Code */}
+                        <div className="flex flex-col gap-2 pt-6 border-t border-primary/10">
+                            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Discount Code (Optional)</p>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Enter code"
+                                    className="flex-1 bg-background-light dark:bg-background-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-300 outline-none focus:border-primary focus:ring-1 focus:ring-primary uppercase"
+                                    value={discountCodeInput}
+                                    onChange={(e) => {
+                                        setDiscountCodeInput(e.target.value.toUpperCase());
+                                        setDiscountError('');
+                                    }}
+                                    disabled={!!appliedDiscount}
+                                />
+                                {appliedDiscount ? (
+                                    <button 
+                                        onClick={() => {
+                                            setAppliedDiscount(null);
+                                            setDiscountCodeInput('');
+                                        }}
+                                        className="bg-red-50 dark:bg-red-900/20 text-red-500 font-bold px-4 py-2 rounded-xl flex items-center justify-center border border-red-100 hover:bg-red-100 transition-colors"
+                                    >
+                                        Remove
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleApplyDiscount}
+                                        disabled={!discountCodeInput.trim() || isValidatingDiscount}
+                                        className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold px-6 py-2 rounded-xl flex items-center justify-center disabled:opacity-50 hover:bg-primary hover:text-white transition-colors"
+                                    >
+                                        {isValidatingDiscount ? <Loader2 className="animate-spin size-5" /> : 'Apply'}
+                                    </button>
+                                )}
+                            </div>
+                            {discountError && <p className="text-red-500 text-xs font-bold pl-1 uppercase tracking-wider">{discountError}</p>}
+                            {appliedDiscount && (
+                                <p className="text-emerald-500 text-xs font-bold pl-1 flex items-center gap-1 uppercase tracking-wider">
+                                    <Check className="size-3" /> Code applied! {appliedDiscount.discountType === 'percent' ? `${appliedDiscount.value}% off` : `${formatPrice(appliedDiscount.value)}${currencySymbol} off`}
+                                </p>
+                            )}
+                        </div>
+
                         {/* Add to Cart */}
-                        <div className="flex items-center gap-4 pt-4">
+                        <div className="flex items-center gap-4 pt-4 border-t border-primary/10">
                             <div className="flex items-center justify-between bg-background-light dark:bg-background-dark border border-primary/20 rounded-xl px-4 py-2 w-32">
                                 <button
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}

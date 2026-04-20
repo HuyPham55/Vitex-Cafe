@@ -78,7 +78,7 @@ export default async function StorefrontLayout({
             <h4 className="font-bold mb-4 text-slate-900 dark:text-slate-100">Quick Links</h4>
             <ul className="space-y-2 text-slate-500 dark:text-slate-400 text-sm">
               <li><Link href="/menu" className="hover:text-primary transition-colors">Menu</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Our Story</Link></li>
+              <li><Link href="/about" className="hover:text-primary transition-colors">Our Story</Link></li>
               <li><Link href="#" className="hover:text-primary transition-colors">Locations</Link></li>
               <li><Link href="#" className="hover:text-primary transition-colors">Careers</Link></li>
             </ul>

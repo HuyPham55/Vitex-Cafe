@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Amber Roast - About Us</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#784c28",
+                        "outline": "#887364",
+                        "on-tertiary-container": "#fcfcff",
+                        "surface-bright": "#ffffff",
+                        "background": "#f8f7f6",
+                        "on-primary-fixed-variant": "#6f3800",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#e9d7cc",
+                        "surface-container-high": "#f7eadd",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#392e27",
+                        "secondary-fixed-dim": "#f7ba8d",
+                        "on-surface-variant": "#554336",
+                        "surface-container-low": "#fffaf8",
+                        "tertiary": "#006192",
+                        "on-primary-container": "#2f1400",
+                        "inverse-primary": "#ffb780",
+                        "tertiary-fixed": "#cce5ff",
+                        "surface": "#f8f7f6",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#007bb8",
+                        "on-tertiary-fixed-variant": "#004b72",
+                        "on-tertiary-fixed": "#001e31",
+                        "secondary-fixed": "#ffdcc4",
+                        "surface-tint": "#d47311",
+                        "on-primary-fixed": "#2f1400",
+                        "on-background": "#221910",
+                        "surface-variant": "#f1dfd4",
+                        "surface-container-highest": "#f1dfd4",
+                        "on-surface": "#221910",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#dbc2b1",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#91cdff",
+                        "secondary": "#82542f",
+                        "primary-fixed": "#ffdcc4",
+                        "surface-container": "#fdf8f4",
+                        "primary": "#d47311",
+                        "primary-fixed-dim": "#ffb780",
+                        "inverse-on-surface": "#ffede3",
+                        "on-secondary-fixed": "#2f1400",
+                        "primary-container": "#ffbd8d",
+                        "secondary-container": "#fdbf92",
+                        "on-secondary-fixed-variant": "#663d1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Work Sans"],
+                        "body": ["Work Sans"],
+                        "label": ["Work Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body antialiased min-h-screen flex flex-col pt-[88px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f8f7f6] dark:bg-[#221910] bg-opacity-95 backdrop-blur-sm border-none shadow-sm dark:shadow-none">
+    <div class="flex justify-between items-center px-8 py-6 w-full max-w-7xl mx-auto">
+        <div class="font-['Work_Sans'] text-2xl font-black uppercase text-[#221910] dark:text-[#f8f7f6] tracking-tight">
+            Amber Roast
+        </div>
+        <nav class="hidden md:flex gap-8 items-center font-['Work_Sans']">
+            <a class="text-[#d47311] font-bold border-b-2 border-[#d47311] pb-1" href="#">Our Story</a>
+            <a class="text-[#221910] dark:text-[#f8f7f6] font-medium opacity-80 hover:text-[#d47311] hover:bg-[#d47311]/5 transition-all duration-300 rounded-lg px-2 py-1" href="#">The Roast</a>
+            <a class="text-[#221910] dark:text-[#f8f7f6] font-medium opacity-80 hover:text-[#d47311] hover:bg-[#d47311]/5 transition-all duration-300 rounded-lg px-2 py-1" href="#">Brewing Tips</a>
+            <a class="text-[#221910] dark:text-[#f8f7f6] font-medium opacity-80 hover:text-[#d47311] hover:bg-[#d47311]/5 transition-all duration-300 rounded-lg px-2 py-1" href="#">Shop</a>
+        </nav>
+        <div class="flex gap-4 items-center">
+            <button class="text-[#221910] dark:text-[#f8f7f6] hover:text-[#d47311] transition-colors p-2 rounded-full hover:bg-primary/5">
+                <span class="material-symbols-outlined">shopping_bag</span>
+            </button>
+            <button class="text-[#221910] dark:text-[#f8f7f6] hover:text-[#d47311] transition-colors p-2 rounded-full hover:bg-primary/5">
+                <span class="material-symbols-outlined">account_circle</span>
+            </button>
+        </div>
+    </div>
+</header>
+<main class="flex-grow w-full max-w-7xl mx-auto md:px-40 px-6 py-16 space-y-32">
+    <!-- Hero Section -->
+    <section class="flex flex-col md:flex-row items-center gap-16 relative">
+        <div class="md:w-1/2 space-y-6 z-10">
+            <h1 class="text-6xl font-black tracking-tighter text-on-background leading-none">The soul of the daily grind.</h1>
+            <p class="text-xl font-body text-on-surface-variant leading-relaxed max-w-md">
+                Crafting moments of clarity through uncompromising artisanal roasting since 2012.
+            </p>
+        </div>
+        <div class="md:w-1/2 w-full h-[600px] relative rounded-xl overflow-hidden shadow-lg surface-container-lowest">
+            <img alt="Coffee Roasting Process" class="object-cover w-full h-full" data-alt="close up of artisan coffee beans roasting in a vintage cast iron drum roaster with warm dramatic lighting and smoke" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALaUAgMIkWyeLYO9HglaaGGd7UUCPKqb-8PoqIC06XPLoxf1U3dA3ZO2Pe6U-2aPoUhljShi8GdTY-xDZrB7wnMpAcoYwh0baLWlr-KBGtUjnS67r_ajZ5ZevFHIXDGjNuHIBQTlkZNGhVDcDTyBfs-iJoV9hRDNA3GRtrTU0KmIQNZn5rcze5_I69HXM4V1dTBzvcEMDe5Ncl7sa9A9nj8fw1-8fGEvnAo9yguDIREINrDGgFUnNrE5kxz-rkJ-ejObeCJm1s"/>
+            <div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+        </div>
+    </section>
+    <!-- Our Origin Story (Asymmetric Text Block) -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        <div class="md:col-span-5 md:col-start-2">
+            <h2 class="text-3xl font-bold text-on-background mb-4">Our Origin Story</h2>
+        </div>
+        <div class="md:col-span-6 space-y-6 text-lg text-on-surface-variant leading-relaxed">
+            <p>
+                Amber Roast didn't start in a boardroom. It began in a tiny, drafty garage in 2012 with a second-hand roaster and an obsession for the perfect extraction.
+            </p>
+            <p>
+                We realized that specialty coffee had become too clinical. We wanted to bring back the warmth, the tactile joy of the ritual, while elevating the bean to its highest potential. It’s not just science; it’s an artisanal craft driven by instinct and deep respect for the farmers.
+            </p>
+        </div>
+    </section>
+    <!-- Meet the Founders (Bento Style) -->
+    <section class="space-y-12">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-on-background">Meet the Founders</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Founder 1 -->
+            <div class="surface-container-low rounded-xl p-8 flex flex-col gap-6 shadow-sm border border-primary/5 hover:bg-primary/5 transition-colors duration-300">
+                <div class="w-32 h-32 rounded-full overflow-hidden self-center border-4 border-surface-container-lowest shadow-md">
+                    <img alt="Elias" class="object-cover w-full h-full" data-alt="portrait of a bearded male coffee roaster in a denim apron looking thoughtfully into the camera with warm natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4eA-eLC_1-gQ-dYT6bk1XtMPH742sbB9KpTYh63YO4b8DVVHDA9bv0RsaEvpVyenQIsv5DJkG8hhv6i4WoQ73ao_0Wco7L5chaYu-enO6ElA6ZVEjVw8yHAd6b7SWHtTw_ToflmEfkiqd3qBLFT1oLqTv72pFUqnZYmUXpF8SYWIX7lmlaoMBmhMoMOsBXs2lyrtC-tZ8MTB90BMGEmlncuUExpumSGzivqeeiSvpqvpXr_J_aiNd__Nc6ehLm2uZMtjX-KLY"/>
+                </div>
+                <div class="text-center space-y-2">
+                    <h3 class="text-2xl font-bold text-on-background">Elias</h3>
+                    <p class="text-sm font-label text-primary uppercase tracking-widest font-bold">Master Roaster</p>
+                    <p class="text-on-surface-variant text-base pt-4">
+                        With over a decade of sensory analysis and green buying experience, Elias approaches roasting like a composer—finding the perfect harmony of origin characteristics and caramelization.
+                    </p>
+                </div>
+            </div>
+            <!-- Founder 2 -->
+            <div class="surface-container-low rounded-xl p-8 flex flex-col gap-6 shadow-sm border border-primary/5 hover:bg-primary/5 transition-colors duration-300">
+                <div class="w-32 h-32 rounded-full overflow-hidden self-center border-4 border-surface-container-lowest shadow-md">
+                    <img alt="Sarah" class="object-cover w-full h-full" data-alt="portrait of a female coffee professional in a minimalist cafe setting with soft warm light smiling slightly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC734kJXxif90Q54k4mQbejaJwvtIV3AcY2VuKzD0khokOGTPqx95e1a5fRMApvsH3tapdxpmCPdss91Rakvz0_5GqR5ziZVBE7cmKb4WY9lDAPeMldRtg6Vv2E764iZrJjT6hsAi6V2ClzcBpjtGm4VxU0ogEFvhiZ1_yl0l-MBCIzhj6aFUR3WhjaAApKvIfLezOYenPoLSGZcmXmMMT4NGxABvZjXpPCg3fDotxkI6pchTnlyN70NcLGCC1trN0mxeGQLH8Z"/>
+                </div>
+                <div class="text-center space-y-2">
+                    <h3 class="text-2xl font-bold text-on-background">Sarah</h3>
+                    <p class="text-sm font-label text-primary uppercase tracking-widest font-bold">Director of Sourcing</p>
+                    <p class="text-on-surface-variant text-base pt-4">
+                        Sarah spends half the year at origin, building relationships with small-lot farmers. Her uncompromising standards ensure every bean meets the Amber Roast profile before it leaves the port.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Uncompromising Quality (Editorial Image + Text) -->
+    <section class="bg-surface-container rounded-xl overflow-hidden shadow-sm flex flex-col md:flex-row">
+        <div class="md:w-1/2 p-12 md:p-16 flex flex-col justify-center space-y-6">
+            <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary mb-2">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+            </div>
+            <h2 class="text-3xl font-bold text-on-background">Uncompromising Quality</h2>
+            <p class="text-lg text-on-surface-variant leading-relaxed">
+                We source exclusively from single-estate farms prioritizing sustainable agriculture. Our roasting process is meticulously calibrated in small batches. We don't rely on automation; we rely on sight, smell, and the sound of the first crack.
+            </p>
+            <button class="self-start mt-4 px-6 py-3 bg-primary text-on-primary font-bold rounded-xl shadow-md hover:bg-primary/90 transition-colors">
+                Explore Our Beans
+            </button>
+        </div>
+        <div class="md:w-1/2 h-64 md:h-auto">
+            <img alt="Quality Beans" class="object-cover w-full h-full" data-alt="aerial view of freshly roasted coffee beans cooling on a tray with warm tones and deep shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAX0xpppdAawMq2YsIo-neDQb6bSsjaghW83i5e_lnRzIpW0tbLjykNZaXFxRAleiUSHzpBQALHWzNiAuOc9asHcbyJKhzxv64aZNnlCdjJMV8ampDswzcEEZS3Hjlb9kh3-WAeBnWMvAFTR45tsdorJL-s9av7HDskLT7kseQitoGDcK2sGxoeHejEo2f-EuDm6DxSdGn2Rwj6hsyMPRaeDdjULIFYruu69GS9TlGDVp3-9c9CKdXTJeE2s4br90Jv-pEw01ap"/>
+        </div>
+    </section>
+    <!-- Our Mission (Centered Statement) -->
+    <section class="text-center max-w-3xl mx-auto py-12 px-6">
+        <span class="material-symbols-outlined text-primary text-5xl mb-6" style="font-variation-settings: 'FILL' 1;">local_cafe</span>
+        <h2 class="text-4xl font-black text-on-background tracking-tight mb-8">Our Mission</h2>
+        <p class="text-2xl font-body text-on-surface-variant leading-relaxed italic">
+            "To transform your daily ritual from a mundane habit into a moment of mindful appreciation, one perfectly extracted cup at a time."
+        </p>
+    </section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#221910] dark:bg-black w-full py-16 px-8 mt-auto border-t border-[#d47311]/10">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6 w-full max-w-7xl mx-auto">
+        <div class="text-xl font-['Work_Sans'] font-black text-[#d47311]">
+            Amber Roast
+        </div>
+        <nav class="flex gap-6 font-['Work_Sans'] text-[14px] font-medium tracking-normal text-[#f8f7f6]">
+            <a class="opacity-60 hover:opacity-100 hover:text-[#d47311] transition-all" href="#">Terms</a>
+            <a class="opacity-60 hover:opacity-100 hover:text-[#d47311] transition-all" href="#">Privacy</a>
+            <a class="opacity-60 hover:opacity-100 hover:text-[#d47311] transition-all" href="#">Wholesale</a>
+            <a class="opacity-60 hover:opacity-100 hover:text-[#d47311] transition-all" href="#">Contact</a>
+        </nav>
+        <div class="font-['Work_Sans'] text-[14px] font-medium tracking-normal text-[#f8f7f6] opacity-60">
+            © 2024 Amber Roast. The Modern Roastery.
+        </div>
+    </div>
+</footer>
+</body></html>

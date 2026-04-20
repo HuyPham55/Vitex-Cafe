@@ -142,9 +142,9 @@ export default function Home() {
                 <Link href="/menu" className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-14 px-6 bg-primary text-white text-base font-bold shadow-lg shadow-primary/30 hover:scale-105 transition-transform">
                   View Menu
                 </Link>
-                <button className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-14 px-6 bg-white/10 backdrop-blur-md border border-white/20 text-white text-base font-bold hover:bg-white/20 transition-all">
+                <Link href="/about" className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-14 px-6 bg-white/10 backdrop-blur-md border border-white/20 text-white text-base font-bold hover:bg-white/20 transition-all">
                   Our Story
-                </button>
+                </Link>
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Coffee, LayoutDashboard, MenuSquare, History, Settings, LogOut, Search, Bell, Loader2, Ticket } from 'lucide-react';
+import { Coffee, LayoutDashboard, MenuSquare, History, Settings, LogOut, Search, Bell, Loader2, Ticket, BookOpen } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLayout({
@@ -72,6 +72,10 @@ export default function AdminLayout({
           <Link href="/admin/asmr" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${pathname === '/admin/asmr' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary'}`}>
             <Coffee className="size-5" />
             <span>ASMR Management</span>
+          </Link>
+          <Link href="/admin/about" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${pathname === '/admin/about' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary'}`}>
+            <BookOpen className="size-5" />
+            <span>About Us Page</span>
           </Link>
           <Link href="/admin/settings" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${pathname === '/admin/settings' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary'}`}>
             <Settings className="size-5" />

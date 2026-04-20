@@ -60,4 +60,5 @@ export const endpoints = {
     auth: '/auth',
     asmr: '/asmr',
     discounts: '/discounts',
+    about: '/settings',
 };

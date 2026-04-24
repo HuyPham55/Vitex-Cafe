@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Work_Sans } from 'next/font/google';
 import './globals.css'; // Global styles
+import { Analytics } from "@vercel/analytics/next"
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -72,6 +73,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

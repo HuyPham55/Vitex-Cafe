@@ -12,6 +12,8 @@ import {
   Trash2,
   History,
   Settings as SettingsIcon,
+  CheckCircle,
+  X,
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -67,6 +69,14 @@ export default function AdminLunchPage() {
   const [cutoffInput, setCutoffInput] = useState('10:30');
   const [paymentInstructions, setPaymentInstructions] = useState('');
   const [paymentQRImage, setPaymentQRImage] = useState('');
+
+  // Toast
+  const [toast, setToast] = useState<{ message: string } | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   const loadAll = async () => {
     try {
@@ -170,6 +180,12 @@ export default function AdminLunchPage() {
       });
       setSettings(saved);
       setCutoffInput(saved.cutoffTime);
+      setToast({
+        message:
+          typeof extendBy === 'number'
+            ? `Cutoff extended by ${extendBy === 60 ? '1 hour' : `${extendBy} min`} — now ${saved.cutoffTime}`
+            : 'Settings saved',
+      });
     } catch (err: any) {
       alert(err?.message || 'Settings update failed');
     }
@@ -536,6 +552,24 @@ export default function AdminLunchPage() {
           </div>
         )}
       </section>
+
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-xl shadow-xl shadow-green-600/30 animate-in slide-in-from-bottom-4 fade-in duration-300"
+        >
+          <CheckCircle className="size-5 shrink-0" />
+          <span className="font-bold text-sm">{toast.message}</span>
+          <button
+            onClick={() => setToast(null)}
+            aria-label="Dismiss"
+            className="ml-2 p-1 rounded-md hover:bg-white/15 transition-colors"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

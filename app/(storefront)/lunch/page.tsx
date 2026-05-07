@@ -60,6 +60,8 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
+const LUNCH_NAME_KEY = 'vt_lunch_name';
+
 export default function LunchPage() {
   const router = useRouter();
   const [menu, setMenu] = useState<LunchMenu | null>(null);
@@ -75,6 +77,21 @@ export default function LunchPage() {
   const [paymentMethod, setPaymentMethod] = useState<'pay_later' | 'pay_now'>('pay_later');
   const [paidConfirmation, setPaidConfirmation] = useState(false);
   const [expired, setExpired] = useState(false);
+
+  // Restore saved name on mount (subsequent-order convenience)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem(LUNCH_NAME_KEY);
+    if (saved) setName(saved);
+  }, []);
+
+  // Persist whenever the user types/edits their name
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (name.trim()) {
+      window.localStorage.setItem(LUNCH_NAME_KEY, name.trim());
+    }
+  }, [name]);
 
   useEffect(() => {
     const load = async () => {
@@ -124,7 +141,7 @@ export default function LunchPage() {
 
   const randomPick = () => {
     if (!menu) return;
-    const mains = shuffle(menu.mainDishes).slice(0, Math.min(3, menu.mainDishes.length)).map((d) => d.name);
+    const mains = shuffle(menu.mainDishes).slice(0, Math.min(baseLimit, menu.mainDishes.length)).map((d) => d.name);
     const veg = menu.vegetables[Math.floor(Math.random() * menu.vegetables.length)]?.name || '';
     setSelectedMains(mains);
     setSelectedVeg(veg);
@@ -136,8 +153,8 @@ export default function LunchPage() {
       setError('Please enter your name');
       return;
     }
-    if (selectedMains.length === 0) {
-      setError('Pick at least one main dish');
+    if (selectedMains.length < baseLimit) {
+      setError(`Pick at least ${baseLimit} main dishes`);
       return;
     }
     if (!selectedVeg) {
@@ -227,7 +244,7 @@ export default function LunchPage() {
               </button>
             </div>
             <p className="text-xs text-slate-500 mb-4">
-              Up to {baseLimit} mains for {formatPrice(basePrice)}đ. Extras +{formatPrice(extraPrice)}đ each. Vegetables included.
+              Pick at least {baseLimit} mains for {formatPrice(basePrice)}đ. Each extra main +{formatPrice(extraPrice)}đ. Vegetables included.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {menu?.mainDishes.map((d) => {

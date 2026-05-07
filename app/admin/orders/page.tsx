@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import {
     Search, Filter, History, Coffee, CheckCircle,
-    XCircle, Clock, MoreVertical, CreditCard, Loader2, Plus, Edit2, Ticket
+    XCircle, Clock, MoreVertical, CreditCard, Loader2, Plus, Edit2, Ticket, UtensilsCrossed
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import OrderModal from '@/components/OrderModal';
+import LunchTag from '@/components/LunchTag';
+import QueueBadge from '@/components/QueueBadge';
 
 export default function OrderManagement() {
     const { token } = useAuth();
@@ -15,6 +17,7 @@ export default function OrderManagement() {
     const [loading, setLoading] = useState(true);
     const [currencySymbol, setCurrencySymbol] = useState('$');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [lunchOnly, setLunchOnly] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState<any>(null);
 
@@ -100,9 +103,11 @@ export default function OrderManagement() {
         }
     };
 
-    const filteredOrders = filterStatus === 'all'
-        ? orders
-        : orders.filter(o => o.status === filterStatus);
+    const filteredOrders = orders.filter(o => {
+        if (filterStatus !== 'all' && o.status !== filterStatus) return false;
+        if (lunchOnly && o.type !== 'lunch') return false;
+        return true;
+    });
 
     if (loading && orders.length === 0) {
         return (
@@ -140,6 +145,16 @@ export default function OrderManagement() {
                             </button>
                         ))}
                     </div>
+                    <button
+                        onClick={() => setLunchOnly(v => !v)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${lunchOnly
+                            ? 'bg-amber-100 text-amber-700 border-amber-300 shadow-md shadow-amber-200'
+                            : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-amber-700 border-primary/10'
+                            }`}
+                        title={lunchOnly ? 'Showing lunch orders only' : 'Click to filter to lunch only'}
+                    >
+                        <UtensilsCrossed className="size-4" /> Lunch
+                    </button>
                 </div>
             </div>
 
@@ -154,12 +169,18 @@ export default function OrderManagement() {
 
                         <div className="p-6 flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
                             <div>
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
                                     <span className="font-black text-primary text-lg">#{order.orderNumber}</span>
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                         }`}>
                                         {order.paymentStatus}
                                     </span>
+                                    {order.type === 'lunch' && (
+                                        <>
+                                            <LunchTag />
+                                            <QueueBadge queueNumber={order.queueNumber} size="sm" />
+                                        </>
+                                    )}
                                 </div>
                                 <p className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                     {order.customerName}

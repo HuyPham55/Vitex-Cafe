@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { MenuSquare, Coffee, CheckCircle, ArrowRight, X, ChevronLeft, ChevronRight, Star, MessageSquareQuote, ExternalLink } from 'lucide-react';
+import { MenuSquare, Coffee, CheckCircle, ArrowRight, X, ChevronLeft, ChevronRight, Star, MessageSquareQuote, ExternalLink, ChefHat } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
 
 export default function Home() {
@@ -179,7 +179,11 @@ export default function Home() {
               {orders.map((order) => (
                 <div key={order._id} className="flex items-center gap-4 bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
-                    {order.status === 'ready' ? <CheckCircle className="size-8" /> : <Coffee className="size-8" />}
+                    {order.status === 'ready'
+                      ? <CheckCircle className="size-8" />
+                      : order.type === 'lunch'
+                        ? <ChefHat className="size-8" />
+                        : <Coffee className="size-8" />}
                   </div>
                   <div className="flex flex-col flex-1">
                     <div className="flex justify-between items-start">

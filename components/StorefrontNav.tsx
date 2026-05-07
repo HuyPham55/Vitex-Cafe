@@ -9,6 +9,7 @@ export default function StorefrontNav() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/menu', label: 'Menu' },
+    { href: '/lunch', label: 'Lunch' },
     { href: '/orders', label: 'Orders' },
     // { href: '/product', label: 'Product' },
     { href: '/about', label: 'About Us' },

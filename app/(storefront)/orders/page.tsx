@@ -4,9 +4,12 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Search, Calendar, Coffee, Loader2, CheckCircle, Info, QrCode, Receipt, ArrowRight, Clock, AlertCircle
+  Search, Calendar, Coffee, Loader2, CheckCircle, Info, QrCode, Receipt, ArrowRight, Clock, AlertCircle, UtensilsCrossed
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice, getImageUrl } from '@/lib/api';
+import LunchTag from '@/components/LunchTag';
+import QueueBadge from '@/components/QueueBadge';
+import CoffeeSuggestionGrid from '@/components/CoffeeSuggestionGrid';
 
 function OrdersPageContent() {
   const searchParams = useSearchParams();
@@ -32,12 +35,14 @@ function OrdersPageContent() {
   const [loading, setLoading] = useState(false);
   const [sidebarLoading, setSidebarLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<'all' | 'lunch'>('all');
 
   // Fetch recent orders for sidebar
   useEffect(() => {
     const fetchRecent = async () => {
       try {
-        const data = await fetchAPI(`${endpoints.orders}/active`);
+        const query = filterMode === 'lunch' ? '?type=lunch' : '';
+        const data = await fetchAPI(`${endpoints.orders}/active${query}`);
         setRecentOrders(data.slice(0, 20));
       } catch (err) {
         console.error('Failed to fetch recent orders:', err);
@@ -54,7 +59,7 @@ function OrdersPageContent() {
         } catch (err) {}
       };
       fetchSettings();
-  }, []);
+  }, [filterMode]);
 
   // Fetch specific order when id changes
   useEffect(() => {
@@ -118,6 +123,30 @@ function OrdersPageContent() {
               <span>Find</span>
             </button>
           </form>
+          <div className="flex justify-center gap-2 mt-6">
+            <button
+              type="button"
+              onClick={() => setFilterMode('lunch')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                filterMode === 'lunch'
+                  ? 'bg-primary text-white shadow-md shadow-primary/20'
+                  : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-primary border border-primary/10'
+              }`}
+            >
+              <UtensilsCrossed className="size-4" /> Lunch
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode('all')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                filterMode === 'all'
+                  ? 'bg-primary text-white shadow-md shadow-primary/20'
+                  : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-primary border border-primary/10'
+              }`}
+            >
+              All
+            </button>
+          </div>
         </div>
       </section>
 
@@ -148,13 +177,19 @@ function OrdersPageContent() {
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-black text-lg text-slate-900 dark:text-slate-100">#{o.orderNumber}</span>
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                      o.paymentStatus === 'paid' 
-                        ? 'bg-green-100 text-green-700' 
+                      o.paymentStatus === 'paid'
+                        ? 'bg-green-100 text-green-700'
                         : 'bg-red-100 text-red-700'
                     }`}>
                       {o.paymentStatus}
                     </span>
                   </div>
+                  {o.type === 'lunch' && (
+                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                      <LunchTag />
+                      <QueueBadge queueNumber={o.queueNumber} size="sm" />
+                    </div>
+                  )}
                   <p className="text-slate-700 dark:text-slate-300 text-xs font-bold mb-2 truncate">
                     {o.customerName}
                   </p>
@@ -195,6 +230,18 @@ function OrdersPageContent() {
                 <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 relative z-10">
                   <div>
                     <h2 className="text-4xl font-black tracking-tighter">Order #{order.orderNumber}</h2>
+                    {order.type === 'lunch' && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                          <UtensilsCrossed className="size-3" /> Lunch
+                        </span>
+                        {order.queueNumber !== undefined && (
+                          <span className="inline-flex items-center bg-white text-primary font-bold text-xs px-2.5 py-1 rounded">
+                            Queue #{order.queueNumber}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <p className="opacity-90 font-medium mt-1">Found in our roasting logs • <span className="font-bold">{order.customerName}</span></p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -318,6 +365,8 @@ function OrdersPageContent() {
           )}
         </div>
       </div>
+
+      <CoffeeSuggestionGrid count={4} />
     </div>
   );
 }

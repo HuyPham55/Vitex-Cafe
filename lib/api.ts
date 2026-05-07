@@ -61,4 +61,7 @@ export const endpoints = {
     asmr: '/asmr',
     discounts: '/discounts',
     about: '/settings',
+    lunchMenu: '/lunch/menu',
+    lunchSettings: '/lunch/settings',
+    lunchOrders: '/lunch/orders',
 };

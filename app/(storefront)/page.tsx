@@ -177,7 +177,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2">
               {orders.map((order) => (
-                <div key={order._id} className="flex items-center gap-4 bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div key={order._id} className="flex items-center gap-4 min-w-0 overflow-hidden bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
                     {order.status === 'ready'
                       ? <CheckCircle className="size-8" />
@@ -185,12 +185,12 @@ export default function Home() {
                         ? <ChefHat className="size-8" />
                         : <Coffee className="size-8" />}
                   </div>
-                  <div className="flex flex-col flex-1">
-                    <div className="flex justify-between items-start">
-                      <p className="text-slate-900 dark:text-slate-100 text-lg font-bold">{order.customerName}</p>
-                      <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">#{order.orderNumber}</span>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2 min-w-0">
+                      <p className="text-slate-900 dark:text-slate-100 text-lg font-bold truncate min-w-0">{order.customerName}</p>
+                      <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded shrink-0">#{order.orderNumber}</span>
                     </div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium truncate">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium truncate min-w-0" title={order.items.map((i: any) => i.name).join(', ')}>
                       {order.items.map((i: any) => i.name).join(', ')}
                     </p>
                     <div className="flex items-center gap-2 mt-2">

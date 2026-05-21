@@ -76,7 +76,7 @@ export type AdminOrdersQueryParams = {
     date?: 'today' | 'all';
     status?: string;
     paymentStatus?: 'all' | 'paid' | 'unpaid';
-    lunchOnly?: boolean;
+    orderType?: 'all' | 'lunch' | 'coffee';
 };
 
 export function buildAdminOrdersQuery(params: AdminOrdersQueryParams): string {
@@ -92,8 +92,8 @@ export function buildAdminOrdersQuery(params: AdminOrdersQueryParams): string {
     if (params.paymentStatus && params.paymentStatus !== 'all') {
         search.set('paymentStatus', params.paymentStatus);
     }
-    if (params.lunchOnly) {
-        search.set('type', 'lunch');
+    if (params.orderType && params.orderType !== 'all') {
+        search.set('type', params.orderType);
     }
     return `?${search.toString()}`;
 }

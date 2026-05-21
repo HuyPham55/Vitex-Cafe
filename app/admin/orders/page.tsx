@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-    History, Coffee, Loader2, Plus, Edit2, Ticket, UtensilsCrossed,
+    History, Coffee, Loader2, Plus, Edit2, Ticket,
     Calendar, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import {
@@ -25,7 +25,7 @@ export default function OrderManagement() {
     const [filterDate, setFilterDate] = useState<'today' | 'all'>('today');
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterPayment, setFilterPayment] = useState<'all' | 'paid' | 'unpaid'>('all');
-    const [lunchOnly, setLunchOnly] = useState(false);
+    const [filterOrderType, setFilterOrderType] = useState<'all' | 'lunch' | 'coffee'>('all');
     const [page, setPage] = useState(1);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState<any>(null);
@@ -39,7 +39,7 @@ export default function OrderManagement() {
                 date: filterDate,
                 status: filterStatus,
                 paymentStatus: filterPayment,
-                lunchOnly,
+                orderType: filterOrderType,
             });
             const [orderResponse, settings] = await Promise.all([
                 fetchAPI(`${endpoints.orders}${query}`, {
@@ -55,7 +55,7 @@ export default function OrderManagement() {
         } finally {
             setLoading(false);
         }
-    }, [token, page, filterDate, filterStatus, filterPayment, lunchOnly]);
+    }, [token, page, filterDate, filterStatus, filterPayment, filterOrderType]);
 
     useEffect(() => {
         setLoading(true);
@@ -79,8 +79,8 @@ export default function OrderManagement() {
         setPage(1);
     };
 
-    const setLunchOnlyAndReset = (value: boolean) => {
-        setLunchOnly(value);
+    const setFilterOrderTypeAndReset = (value: 'all' | 'lunch' | 'coffee') => {
+        setFilterOrderType(value);
         setPage(1);
     };
 
@@ -216,16 +216,16 @@ export default function OrderManagement() {
                         <option value="paid">Payment: Paid</option>
                         <option value="unpaid">Payment: Unpaid</option>
                     </select>
-                    <button
-                        onClick={() => setLunchOnlyAndReset(!lunchOnly)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${lunchOnly
-                            ? 'bg-amber-100 text-amber-700 border-amber-300 shadow-md shadow-amber-200'
-                            : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-amber-700 border-primary/10'
-                            }`}
-                        title={lunchOnly ? 'Showing lunch orders only' : 'Click to filter to lunch only'}
+                    <select
+                        value={filterOrderType}
+                        onChange={(e) => setFilterOrderTypeAndReset(e.target.value as 'all' | 'lunch' | 'coffee')}
+                        aria-label="Filter by order type"
+                        className="bg-white dark:bg-slate-900 border border-primary/10 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
                     >
-                        <UtensilsCrossed className="size-4" /> Lunch
-                    </button>
+                        <option value="all">Type: All orders</option>
+                        <option value="lunch">Type: Lunch</option>
+                        <option value="coffee">Type: Coffee</option>
+                    </select>
                 </div>
             </div>
 

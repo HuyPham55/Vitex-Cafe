@@ -11,6 +11,18 @@ export function formatPrice(price: number | string) {
 }
 
 
+/** Product id on an order line item (string id or populated ref). */
+export function getOrderItemProductId(item: {
+    product?: string | { _id?: string };
+}): string | null {
+    if (!item?.product) return null;
+    if (typeof item.product === 'string') return item.product;
+    if (typeof item.product === 'object' && item.product._id) {
+        return String(item.product._id);
+    }
+    return null;
+}
+
 export function getImageUrl(path: string | null | undefined) {
     if (!path) return 'https://picsum.photos/400/300';
     if (path.startsWith('http')) return path;

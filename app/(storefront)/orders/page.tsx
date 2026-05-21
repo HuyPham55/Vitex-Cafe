@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Search, Calendar, Coffee, Loader2, CheckCircle, Info, QrCode, Receipt, ArrowRight, Clock, AlertCircle, UtensilsCrossed
 } from 'lucide-react';
-import { fetchAPI, endpoints, formatPrice, getImageUrl } from '@/lib/api';
+import { fetchAPI, endpoints, formatPrice, getImageUrl, getOrderItemProductId } from '@/lib/api';
 import LunchTag from '@/components/LunchTag';
 import QueueBadge from '@/components/QueueBadge';
 import CoffeeSuggestionGrid from '@/components/CoffeeSuggestionGrid';
@@ -264,22 +264,45 @@ function OrdersPageContent() {
                       <Receipt className="text-primary size-6" /> Brewed Items
                     </h4>
                     <ul className="divide-y divide-primary/10">
-                      {order.items.map((item: any, i: number) => (
-                        <li key={i} className="py-5 flex justify-between items-center group">
-                          <div className="flex gap-4 items-center">
-                            <div className="size-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary/40">
-                              <Coffee className="size-6" />
+                      {order.items.map((item: any, i: number) => {
+                        const productId = getOrderItemProductId(item);
+                        const variantText = (item.variantOptions || item.selectedVariants || [])
+                          .map((v: any) => v.selectedOption || v.option)
+                          .filter(Boolean)
+                          .join(' • ');
+                        const itemDetails = (
+                          <>
+                            <p className={`font-bold text-slate-900 dark:text-slate-100 ${productId ? 'group-hover/link:text-primary transition-colors' : ''}`}>
+                              {item.quantity}x {item.name}
+                            </p>
+                            {variantText ? (
+                              <p className="text-xs text-slate-500 font-medium">{variantText}</p>
+                            ) : null}
+                          </>
+                        );
+                        return (
+                          <li key={i} className="py-5 flex justify-between items-center group">
+                            <div className="flex gap-4 items-center min-w-0">
+                              <div className="size-14 shrink-0 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary/40">
+                                <Coffee className="size-6" />
+                              </div>
+                              {productId ? (
+                                <Link
+                                  href={`/product/${productId}`}
+                                  className="group/link min-w-0 cursor-pointer"
+                                >
+                                  {itemDetails}
+                                </Link>
+                              ) : (
+                                <div className="min-w-0">{itemDetails}</div>
+                              )}
                             </div>
-                            <div>
-                              <p className="font-bold text-slate-900 dark:text-slate-100">{item.quantity}x {item.name}</p>
-                              <p className="text-xs text-slate-500 font-medium">
-                                {(item.variantOptions || item.selectedVariants || []).map((v: any) => v.selectedOption || v.option).join(' • ')}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="font-black text-slate-900 dark:text-slate-100">{formatPrice(item.subtotal || 0)}{settings?.currencySymbol || '$'}</p>
-                        </li>
-                      ))}
+                            <p className="font-black text-slate-900 dark:text-slate-100 shrink-0 ml-4">
+                              {formatPrice(item.subtotal || 0)}{settings?.currencySymbol || '$'}
+                            </p>
+                          </li>
+                        );
+                      })}
                     </ul>
                     
                     {/* Totals Section */}

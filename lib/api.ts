@@ -63,6 +63,41 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     return data;
 }
 
+export type AdminOrdersPagination = {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+};
+
+export type AdminOrdersQueryParams = {
+    page: number;
+    limit?: number;
+    date?: 'today' | 'all';
+    status?: string;
+    paymentStatus?: 'all' | 'paid' | 'unpaid';
+    lunchOnly?: boolean;
+};
+
+export function buildAdminOrdersQuery(params: AdminOrdersQueryParams): string {
+    const search = new URLSearchParams();
+    search.set('page', String(params.page));
+    search.set('limit', String(params.limit ?? 20));
+    if (params.date === 'today') {
+        search.set('date', 'today');
+    }
+    if (params.status && params.status !== 'all') {
+        search.set('status', params.status);
+    }
+    if (params.paymentStatus && params.paymentStatus !== 'all') {
+        search.set('paymentStatus', params.paymentStatus);
+    }
+    if (params.lunchOnly) {
+        search.set('type', 'lunch');
+    }
+    return `?${search.toString()}`;
+}
+
 export const endpoints = {
     products: '/products',
     variants: '/variants',

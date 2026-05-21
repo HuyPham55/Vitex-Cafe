@@ -1,49 +1,88 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-    Search, Filter, History, Coffee, CheckCircle,
-    XCircle, Clock, MoreVertical, CreditCard, Loader2, Plus, Edit2, Ticket, UtensilsCrossed
+    History, Coffee, Loader2, Plus, Edit2, Ticket, UtensilsCrossed,
+    Calendar, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
+import {
+    fetchAPI, endpoints, formatPrice, buildAdminOrdersQuery,
+    type AdminOrdersPagination
+} from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import OrderModal from '@/components/OrderModal';
 import LunchTag from '@/components/LunchTag';
 import QueueBadge from '@/components/QueueBadge';
 
+const ORDERS_PAGE_SIZE = 20;
+
 export default function OrderManagement() {
     const { token } = useAuth();
     const [orders, setOrders] = useState<any[]>([]);
+    const [pagination, setPagination] = useState<AdminOrdersPagination | null>(null);
     const [loading, setLoading] = useState(true);
     const [currencySymbol, setCurrencySymbol] = useState('$');
+    const [filterDate, setFilterDate] = useState<'today' | 'all'>('today');
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterPayment, setFilterPayment] = useState<'all' | 'paid' | 'unpaid'>('all');
     const [lunchOnly, setLunchOnly] = useState(false);
+    const [page, setPage] = useState(1);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState<any>(null);
 
-    const getOrders = async () => {
+    const getOrders = useCallback(async () => {
+        if (!token) return;
         try {
-            const [orderData, settings] = await Promise.all([
-                fetchAPI(endpoints.orders, {
+            const query = buildAdminOrdersQuery({
+                page,
+                limit: ORDERS_PAGE_SIZE,
+                date: filterDate,
+                status: filterStatus,
+                paymentStatus: filterPayment,
+                lunchOnly,
+            });
+            const [orderResponse, settings] = await Promise.all([
+                fetchAPI(`${endpoints.orders}${query}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
                 fetchAPI(endpoints.settings)
             ]);
-            setOrders(orderData);
+            setOrders(orderResponse.orders ?? []);
+            setPagination(orderResponse.pagination ?? null);
             setCurrencySymbol(settings.currencySymbol || '$');
         } catch (error) {
             console.error('Failed to fetch orders:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, page, filterDate, filterStatus, filterPayment, lunchOnly]);
 
     useEffect(() => {
+        setLoading(true);
         getOrders();
         const interval = setInterval(getOrders, 10000);
         return () => clearInterval(interval);
-    }, []);
+    }, [getOrders]);
+
+    const setFilterDateAndReset = (value: 'today' | 'all') => {
+        setFilterDate(value);
+        setPage(1);
+    };
+
+    const setFilterStatusAndReset = (value: string) => {
+        setFilterStatus(value);
+        setPage(1);
+    };
+
+    const setFilterPaymentAndReset = (value: 'all' | 'paid' | 'unpaid') => {
+        setFilterPayment(value);
+        setPage(1);
+    };
+
+    const setLunchOnlyAndReset = (value: boolean) => {
+        setLunchOnly(value);
+        setPage(1);
+    };
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
@@ -78,6 +117,7 @@ export default function OrderManagement() {
                 headers: { Authorization: `Bearer ${token}` },
                 body: JSON.stringify(orderData)
             });
+            setPage(1);
             getOrders();
         } catch (error: any) {
             throw new Error(error.message || 'Failed to create order');
@@ -104,12 +144,11 @@ export default function OrderManagement() {
         }
     };
 
-    const filteredOrders = orders.filter(o => {
-        if (filterStatus !== 'all' && o.status !== filterStatus) return false;
-        if (filterPayment !== 'all' && o.paymentStatus !== filterPayment) return false;
-        if (lunchOnly && o.type !== 'lunch') return false;
-        return true;
-    });
+    const total = pagination?.total ?? 0;
+    const totalPages = pagination?.totalPages ?? 1;
+    const limit = pagination?.limit ?? ORDERS_PAGE_SIZE;
+    const rangeStart = total === 0 ? 0 : (page - 1) * limit + 1;
+    const rangeEnd = Math.min(page * limit, total);
 
     if (loading && orders.length === 0) {
         return (
@@ -126,18 +165,38 @@ export default function OrderManagement() {
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Order Management</h2>
                     <p className="text-slate-500 dark:text-slate-400 text-sm">Monitor and process orders in real-time.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                         <Plus className="size-4" /> New Order
                     </button>
+                    <div className="flex gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-primary/10 overflow-x-auto no-scrollbar">
+                        <button
+                            onClick={() => setFilterDateAndReset('today')}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterDate === 'today'
+                                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                : 'text-slate-500 hover:text-primary'
+                                }`}
+                        >
+                            <Calendar className="size-3.5" /> Today
+                        </button>
+                        <button
+                            onClick={() => setFilterDateAndReset('all')}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterDate === 'all'
+                                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                : 'text-slate-500 hover:text-primary'
+                                }`}
+                        >
+                            <History className="size-3.5" /> All time
+                        </button>
+                    </div>
                     <div className="flex gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-primary/10 overflow-x-auto no-scrollbar max-w-full">
                         {['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'].map((status) => (
                             <button
                                 key={status}
-                                onClick={() => setFilterStatus(status)}
+                                onClick={() => setFilterStatusAndReset(status)}
                                 className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap ${filterStatus === status
                                     ? 'bg-primary text-white shadow-md shadow-primary/20'
                                     : 'text-slate-500 hover:text-primary'
@@ -147,31 +206,18 @@ export default function OrderManagement() {
                             </button>
                         ))}
                     </div>
-                    <div className="flex gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-primary/10 overflow-x-auto no-scrollbar">
-                        {([
-                            { value: 'all' as const, label: 'All payments' },
-                            { value: 'paid' as const, label: 'Paid' },
-                            { value: 'unpaid' as const, label: 'Unpaid' },
-                        ]).map(({ value, label }) => (
-                            <button
-                                key={value}
-                                onClick={() => setFilterPayment(value)}
-                                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterPayment === value
-                                    ? value === 'paid'
-                                        ? 'bg-green-600 text-white shadow-md shadow-green-600/20'
-                                        : value === 'unpaid'
-                                            ? 'bg-red-600 text-white shadow-md shadow-red-600/20'
-                                            : 'bg-primary text-white shadow-md shadow-primary/20'
-                                    : 'text-slate-500 hover:text-primary'
-                                    }`}
-                            >
-                                {value !== 'all' && <CreditCard className="size-3.5" />}
-                                {label}
-                            </button>
-                        ))}
-                    </div>
+                    <select
+                        value={filterPayment}
+                        onChange={(e) => setFilterPaymentAndReset(e.target.value as 'all' | 'paid' | 'unpaid')}
+                        aria-label="Filter by payment status"
+                        className="bg-white dark:bg-slate-900 border border-primary/10 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                    >
+                        <option value="all">Payment: All</option>
+                        <option value="paid">Payment: Paid</option>
+                        <option value="unpaid">Payment: Unpaid</option>
+                    </select>
                     <button
-                        onClick={() => setLunchOnly(v => !v)}
+                        onClick={() => setLunchOnlyAndReset(!lunchOnly)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${lunchOnly
                             ? 'bg-amber-100 text-amber-700 border-amber-300 shadow-md shadow-amber-200'
                             : 'bg-white dark:bg-slate-900 text-slate-500 hover:text-amber-700 border-primary/10'
@@ -184,7 +230,7 @@ export default function OrderManagement() {
             </div>
 
             <div className="space-y-4">
-                {filteredOrders.map((order) => (
+                {orders.map((order) => (
                     <div key={order._id} className="bg-white dark:bg-slate-900 border border-primary/5 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row">
                         <div className={`w-2 shrink-0 ${order.status === 'pending' ? 'bg-blue-500' :
                             order.status === 'preparing' ? 'bg-orange-500' :
@@ -301,7 +347,7 @@ export default function OrderManagement() {
                     </div>
                 ))}
 
-                {filteredOrders.length === 0 && (
+                {orders.length === 0 && (
                     <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-primary/5">
                         <History className="size-12 text-slate-200 mx-auto mb-4" />
                         <p className="text-slate-400 font-medium">No orders found matching the current filters.</p>
@@ -309,7 +355,33 @@ export default function OrderManagement() {
                 )}
             </div>
 
-            {/* Modals */}
+            {total > 0 && (
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-primary/10 rounded-2xl px-6 py-4">
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Showing {rangeStart}–{rangeEnd} of {total}
+                        <span className="text-slate-400 ml-2">(Page {page} of {totalPages})</span>
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page <= 1}
+                            className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold border border-primary/10 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/5 transition-all"
+                        >
+                            <ChevronLeft className="size-4" /> Prev
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                            className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold border border-primary/10 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/5 transition-all"
+                        >
+                            Next <ChevronRight className="size-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <OrderModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}

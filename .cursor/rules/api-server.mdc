@@ -1,0 +1,32 @@
+---
+description: Express API and MongoDB conventions for api-server submodule
+globs: api-server/**/*
+alwaysApply: false
+---
+
+# API server (`api-server/`)
+
+CommonJS Express app; entry `index.js`. MongoDB via Mongoose (`config/db.js`).
+
+## Patterns
+
+- Routes in `routes/`, logic in `controllers/`, schemas in `models/`.
+- Auth: `middleware/authMiddleware.js` — JWT from `Authorization: Bearer`.
+- Uploads: `middleware/uploadMiddleware.js` (Vercel Blob when configured).
+- CORS: `ALLOWED_ORIGINS` comma-separated; localhost allowed in dev.
+
+## Adding endpoints
+
+1. Model in `models/` if needed.
+2. Controller with clear error messages (JSON `{ message }`).
+3. Mount route in `index.js` under `/api/...`.
+4. Add matching key to frontend `lib/api.ts` → `endpoints`.
+
+## Time and locale
+
+- `process.env.TZ = 'Asia/Ho_Chi_Minh'` is set at startup.
+- Order/lunch cutoff logic should respect Vietnam timezone.
+
+## Submodule
+
+This folder is a git submodule (`vitex-cafe-api`). Significant API changes belong in that repo’s workflow, not only the parent app.

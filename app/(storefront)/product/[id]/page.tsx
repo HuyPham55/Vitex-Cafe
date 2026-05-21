@@ -9,6 +9,7 @@ import {
     Plus, Minus, Check, Loader2, Image as ImageIcon, X, Info, Clock, AlertTriangle
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
+import { CUSTOMER_NAME_STORAGE_KEY } from '@/lib/utils';
 
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -81,12 +82,21 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         };
         getData();
 
-        // Load anonymous preference
+        // Load saved customer name and anonymous preference
+        const savedName = localStorage.getItem(CUSTOMER_NAME_STORAGE_KEY);
+        if (savedName) setCustomerName(savedName);
+
         const savedAnon = localStorage.getItem('anonymous_order');
         if (savedAnon !== null) {
             setIsAnonymous(savedAnon === 'true');
         }
     }, [id]);
+
+    useEffect(() => {
+        if (customerName.trim()) {
+            localStorage.setItem(CUSTOMER_NAME_STORAGE_KEY, customerName.trim());
+        }
+    }, [customerName]);
 
     useEffect(() => {
         localStorage.setItem('anonymous_order', isAnonymous.toString());

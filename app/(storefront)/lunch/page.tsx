@@ -15,6 +15,7 @@ import {
   ChefHat,
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice, getImageUrl } from '@/lib/api';
+import { CUSTOMER_NAME_STORAGE_KEY } from '@/lib/utils';
 import CutoffCountdown from '@/components/CutoffCountdown';
 import QueueBadge from '@/components/QueueBadge';
 import CoffeeSuggestionGrid from '@/components/CoffeeSuggestionGrid';
@@ -60,8 +61,6 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-const LUNCH_NAME_KEY = 'vt_lunch_name';
-
 export default function LunchPage() {
   const router = useRouter();
   const [menu, setMenu] = useState<LunchMenu | null>(null);
@@ -81,7 +80,7 @@ export default function LunchPage() {
   // Restore saved name on mount (subsequent-order convenience)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const saved = window.localStorage.getItem(LUNCH_NAME_KEY);
+    const saved = window.localStorage.getItem(CUSTOMER_NAME_STORAGE_KEY);
     if (saved) setName(saved);
   }, []);
 
@@ -89,7 +88,7 @@ export default function LunchPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (name.trim()) {
-      window.localStorage.setItem(LUNCH_NAME_KEY, name.trim());
+      window.localStorage.setItem(CUSTOMER_NAME_STORAGE_KEY, name.trim());
     }
   }, [name]);
 

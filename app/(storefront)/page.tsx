@@ -177,7 +177,12 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2">
               {orders.map((order) => (
-                <div key={order._id} className="flex items-center gap-4 min-w-0 overflow-hidden bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <Link
+                  key={order._id}
+                  href={`/orders?id=${order.orderNumber}`}
+                  aria-label={`View order #${order.orderNumber} details`}
+                  className="flex items-center gap-4 min-w-0 overflow-hidden bg-white dark:bg-background-dark border border-primary/10 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-primary/25 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40"
+                >
                   <div className="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-14">
                     {order.status === 'ready'
                       ? <CheckCircle className="size-8" />
@@ -200,7 +205,7 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

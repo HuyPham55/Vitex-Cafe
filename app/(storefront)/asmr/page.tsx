@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Heart, Volume2 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl } from '@/lib/api';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
 interface AsmrVideo {
   _id: string;

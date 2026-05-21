@@ -17,6 +17,7 @@ export default function OrderManagement() {
     const [loading, setLoading] = useState(true);
     const [currencySymbol, setCurrencySymbol] = useState('$');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [filterPayment, setFilterPayment] = useState<'all' | 'paid' | 'unpaid'>('all');
     const [lunchOnly, setLunchOnly] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState<any>(null);
@@ -105,6 +106,7 @@ export default function OrderManagement() {
 
     const filteredOrders = orders.filter(o => {
         if (filterStatus !== 'all' && o.status !== filterStatus) return false;
+        if (filterPayment !== 'all' && o.paymentStatus !== filterPayment) return false;
         if (lunchOnly && o.type !== 'lunch') return false;
         return true;
     });
@@ -142,6 +144,29 @@ export default function OrderManagement() {
                                     }`}
                             >
                                 {status}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-primary/10 overflow-x-auto no-scrollbar">
+                        {([
+                            { value: 'all' as const, label: 'All payments' },
+                            { value: 'paid' as const, label: 'Paid' },
+                            { value: 'unpaid' as const, label: 'Unpaid' },
+                        ]).map(({ value, label }) => (
+                            <button
+                                key={value}
+                                onClick={() => setFilterPayment(value)}
+                                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterPayment === value
+                                    ? value === 'paid'
+                                        ? 'bg-green-600 text-white shadow-md shadow-green-600/20'
+                                        : value === 'unpaid'
+                                            ? 'bg-red-600 text-white shadow-md shadow-red-600/20'
+                                            : 'bg-primary text-white shadow-md shadow-primary/20'
+                                    : 'text-slate-500 hover:text-primary'
+                                    }`}
+                            >
+                                {value !== 'all' && <CreditCard className="size-3.5" />}
+                                {label}
                             </button>
                         ))}
                     </div>
@@ -279,7 +304,7 @@ export default function OrderManagement() {
                 {filteredOrders.length === 0 && (
                     <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-primary/5">
                         <History className="size-12 text-slate-200 mx-auto mb-4" />
-                        <p className="text-slate-400 font-medium">No orders found matching this status.</p>
+                        <p className="text-slate-400 font-medium">No orders found matching the current filters.</p>
                     </div>
                 )}
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
     Coffee, Droplets, Snowflake, Cuboid, User,
@@ -9,6 +9,7 @@ import {
     Plus, Minus, Check, Loader2, Image as ImageIcon, X, Info, Clock, AlertTriangle
 } from 'lucide-react';
 import { fetchAPI, endpoints, getImageUrl, formatPrice } from '@/lib/api';
+import { CUSTOMER_NAME_STORAGE_KEY } from '@/lib/utils';
 
 export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -17,6 +18,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const [product, setProduct] = useState<any>(null);
     const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [missing, setMissing] = useState(false);
     const [currencySymbol, setCurrencySymbol] = useState('$');
     const [quantity, setQuantity] = useState(1);
     const [selectedVariants, setSelectedVariants] = useState<Record<string, any>>({});
@@ -43,6 +45,10 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     useEffect(() => {
+        setLoading(true);
+        setMissing(false);
+        setProduct(null);
+
         const getData = async () => {
             try {
                 const [prodData, reviewsData, settings] = await Promise.all([
@@ -50,10 +56,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     fetchAPI(`${endpoints.reviews}/${id}`),
                     fetchAPI(endpoints.settings)
                 ]);
-                // Treat hidden products as not found for customers
                 if (prodData.isHidden) {
-                    setProduct(null);
-                    setLoading(false);
+                    setMissing(true);
                     return;
                 }
                 setProduct(prodData);
@@ -62,7 +66,6 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 setOpenTime(settings.openTime || '08:00');
                 setCloseTime(settings.closeTime || '22:00');
 
-                // Initialize default variants
                 const defaults: Record<string, any> = {};
                 prodData.variantTypes?.forEach((vt: any) => {
                     if (vt.options?.length > 0) {
@@ -72,18 +75,28 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 setSelectedVariants(defaults);
             } catch (error) {
                 console.error('Failed to fetch product:', error);
+                setMissing(true);
             } finally {
                 setLoading(false);
             }
         };
         getData();
 
-        // Load anonymous preference
+        // Load saved customer name and anonymous preference
+        const savedName = localStorage.getItem(CUSTOMER_NAME_STORAGE_KEY);
+        if (savedName) setCustomerName(savedName);
+
         const savedAnon = localStorage.getItem('anonymous_order');
         if (savedAnon !== null) {
             setIsAnonymous(savedAnon === 'true');
         }
     }, [id]);
+
+    useEffect(() => {
+        if (customerName.trim()) {
+            localStorage.setItem(CUSTOMER_NAME_STORAGE_KEY, customerName.trim());
+        }
+    }, [customerName]);
 
     useEffect(() => {
         localStorage.setItem('anonymous_order', isAnonymous.toString());
@@ -268,13 +281,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
         );
     }
 
-    if (!product) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Product not found</h2>
-                <Link href="/menu" className="mt-4 text-primary font-bold">Back to Menu</Link>
-            </div>
-        );
+    if (missing || !product) {
+        notFound();
     }
 
     const averageRating = reviews.length > 0

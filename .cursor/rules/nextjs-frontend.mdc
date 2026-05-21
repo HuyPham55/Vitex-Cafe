@@ -1,0 +1,33 @@
+---
+description: Next.js App Router and React conventions for Vitex Cafe
+globs: app/**/*.{ts,tsx},components/**/*.{ts,tsx},lib/**/*.{ts,tsx},context/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend (Next.js)
+
+## Structure
+
+- `app/(storefront)/` — public routes; `app/admin/` — admin (auth via `AuthContext`).
+- `'use client'` only when using hooks, browser APIs, or event handlers.
+
+## API layer
+
+```typescript
+import { fetchAPI, endpoints, formatPrice, getImageUrl } from '@/lib/api';
+
+const products = await fetchAPI(endpoints.products);
+```
+
+- Admin JWT: `fetchAPI` reads `vt_admin_token` from `localStorage` on the client.
+- Images from API paths: `getImageUrl(path)`; external URLs pass through unchanged.
+
+## UI
+
+- Tailwind utility classes; brand tokens in `globals.css`.
+- Icons: `lucide-react`. Animations: `motion` package.
+- Prices: always `formatPrice` for display (vi-VN formatting).
+
+## Metadata
+
+- `app/layout.tsx` fetches settings for SEO/favicon — use `cache: 'no-store'` when mirroring that pattern.

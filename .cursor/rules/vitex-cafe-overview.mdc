@@ -1,0 +1,27 @@
+---
+description: Vitex Cafe monorepo context and working agreements
+alwaysApply: true
+---
+
+# Vitex Cafe
+
+Next.js 15 storefront + admin at repo root; Express/MongoDB API in `api-server/` (git submodule).
+
+## Before changing code
+
+- Read `AGENTS.md` for layout, env vars, and commands.
+- Frontend env: `.env.local` from `.env.example` (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_NAME`).
+- API env: `api-server/.env` from `api-server/.env.example` (`MONGODB_URI`, `JWT_SECRET`, `ALLOWED_ORIGINS`).
+- Never commit secrets or `.env*` (except `.env.example`).
+
+## Scope
+
+- Keep diffs minimal; match existing patterns in the touched area.
+- Use `@/` imports and `lib/api.ts` for all HTTP calls to the backend.
+- Business timezone: `Asia/Ho_Chi_Minh`.
+- `api-server/` changes may require commits in the submodule repository.
+
+## Do not assume
+
+- README “AI Studio / GEMINI” boilerplate — this app is primarily cafe e-commerce; Gemini deps may be unused.
+- Do not create git commits unless the user asks.

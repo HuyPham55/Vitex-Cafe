@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -15,6 +15,7 @@ import {
   CheckCircle,
   X,
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import CutoffCountdown from '@/components/CutoffCountdown';
@@ -232,32 +233,26 @@ export default function AdminLunchPage() {
 
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-  const exportTxt = () => {
-    const lines: string[] = [];
-    lines.push(`Vitex Lunch Order — ${menu?.date || new Date().toISOString().slice(0, 10)}`);
-    lines.push(`Total orders: ${orders.length}`);
-    lines.push('');
-    lines.push('--- Dish counts ---');
-    for (const [k, v] of Object.entries(dishCounts).sort((a, b) => b[1] - a[1])) {
-      lines.push(`${k}: ${v}`);
-    }
-    lines.push('');
-    lines.push('--- Per-employee ---');
-    for (const o of orders.sort((a, b) => a.queueNumber - b.queueNumber)) {
-      const items = [...(o.lunchSelection?.mains || []), o.lunchSelection?.vegetable].filter(Boolean).join(', ');
-      lines.push(
-        `Queue #${o.queueNumber} — ${o.customerName} — ${items} — ${formatPrice(o.total)}đ — ${o.paymentStatus}`
-      );
-    }
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `lunch-${menu?.date || 'today'}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const exportXlsx = () => {
+    const rows = orders
+      .slice()
+      .sort((a, b) => a.queueNumber - b.queueNumber)
+      .map((o) => ({
+        'Queue #': o.queueNumber,
+        'Price (đ)': o.total,
+        'Mains': (o.lunchSelection?.mains || []).join(', '),
+        'Vegetable': o.lunchSelection?.vegetable || '',
+        'Note': o.note || '',
+        'Customer Name': o.customerName,
+      }));
+
+    const totalPrice = orders.reduce((sum, o) => sum + o.total, 0);
+    rows.push({ 'Queue #': 'TOTAL' as any, 'Price (đ)': totalPrice, 'Mains': '', 'Vegetable': '', 'Note': '', 'Customer Name': '' });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Queue');
+    XLSX.writeFile(wb, `lunch-${menu?.date || new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   if (loading) {
@@ -296,11 +291,11 @@ export default function AdminLunchPage() {
           <div className="flex items-center justify-between">
             <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Kitchen export</p>
             <button
-              onClick={exportTxt}
+              onClick={exportXlsx}
               disabled={orders.length === 0}
               className="flex items-center gap-1 text-xs font-bold text-primary hover:bg-primary/5 px-2 py-1 rounded disabled:opacity-40"
             >
-              <Download className="size-3.5" /> .txt
+              <Download className="size-3.5" /> .xlsx
             </button>
           </div>
           <div className="mt-2 space-y-1 max-h-24 overflow-y-auto">

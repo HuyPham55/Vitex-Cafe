@@ -43,6 +43,7 @@ interface LunchOrder {
   status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   createdAt: string;
   lunchDate?: string;
+  note?: string;
 }
 
 type RangeTab = 'today' | '7' | '30';
@@ -481,6 +482,11 @@ export default function AdminLunchPage() {
                           </p>
                           {o.lunchSelection?.vegetable && (
                             <p className="truncate text-slate-500">+ {o.lunchSelection.vegetable}</p>
+                          )}
+                          {o.note && (
+                            <p className="text-[10px] text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded mt-1 border border-orange-100 dark:border-orange-800 truncate">
+                              Note: {o.note}
+                            </p>
                           )}
                         </td>
                         <td className="px-4 py-3 font-bold">{formatPrice(o.total)}đ</td>

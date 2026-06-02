@@ -135,7 +135,8 @@ export default function OrderManagement() {
                     note: orderData.note,
                     total: orderData.total,
                     customerName: orderData.customerName,
-                    isAnonymous: orderData.isAnonymous
+                    isAnonymous: orderData.isAnonymous,
+                    type: orderData.type,
                 })
             });
             getOrders();

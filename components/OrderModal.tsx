@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Loader2, Save, Coffee } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, Save, Coffee, UtensilsCrossed } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice } from '@/lib/api';
 
 interface OrderModalProps {
@@ -20,6 +20,7 @@ export default function OrderModal({ isOpen, onClose, onSave, initialData, curre
     const [note, setNote] = useState(initialData?.note || '');
     const [items, setItems] = useState<any[]>(initialData?.items || []);
     const [isAnonymous, setIsAnonymous] = useState(initialData?.isAnonymous || false);
+    const [isLunch, setIsLunch] = useState(initialData?.type === 'lunch');
 
     useEffect(() => {
         if (isOpen) {
@@ -29,12 +30,14 @@ export default function OrderModal({ isOpen, onClose, onSave, initialData, curre
                 setNote(initialData.note || '');
                 setItems(initialData.items || []);
                 setIsAnonymous(initialData.isAnonymous || false);
+                setIsLunch(initialData.type === 'lunch');
             } else {
                 // Reset for new order if needed
                 setCustomerName('');
                 setNote('');
                 setItems([]);
                 setIsAnonymous(false);
+                setIsLunch(false);
             }
         }
     }, [isOpen, initialData]);
@@ -134,7 +137,8 @@ export default function OrderModal({ isOpen, onClose, onSave, initialData, curre
                 items,
                 note,
                 total: calculateTotal(),
-                isAnonymous
+                isAnonymous,
+                type: isLunch ? 'lunch' : 'coffee',
             });
             onClose();
         } catch (error: any) {
@@ -150,11 +154,28 @@ export default function OrderModal({ isOpen, onClose, onSave, initialData, curre
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border border-white/10">
                 <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
-                    <div>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">
-                            {initialData ? 'Edit Order' : 'Create New Order'}
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium">Fill in the details below to {initialData ? 'update' : 'place'} an order.</p>
+                    <div className="flex items-center gap-3">
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">
+                                {initialData ? 'Edit Order' : 'Create New Order'}
+                            </h3>
+                            <p className="text-xs text-slate-500 font-medium">Fill in the details below to {initialData ? 'update' : 'place'} an order.</p>
+                        </div>
+                        {initialData && (
+                            <button
+                                type="button"
+                                onClick={() => setIsLunch((v) => !v)}
+                                title="Toggle order type"
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider border transition-all ${
+                                    isLunch
+                                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                }`}
+                            >
+                                <UtensilsCrossed className="size-3" />
+                                Lunch
+                            </button>
+                        )}
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors">
                         <X className="size-5" />

@@ -15,7 +15,7 @@ import {
   ChefHat,
 } from 'lucide-react';
 import { fetchAPI, endpoints, formatPrice, getImageUrl } from '@/lib/api';
-import { CUSTOMER_NAME_STORAGE_KEY } from '@/lib/utils';
+import { CUSTOMER_NAME_STORAGE_KEY, LUNCH_NOTE_STORAGE_KEY } from '@/lib/utils';
 import CutoffCountdown from '@/components/CutoffCountdown';
 import QueueBadge from '@/components/QueueBadge';
 import CoffeeSuggestionGrid from '@/components/CoffeeSuggestionGrid';
@@ -73,6 +73,7 @@ export default function LunchPage() {
   const [selectedMains, setSelectedMains] = useState<string[]>([]);
   const [selectedVeg, setSelectedVeg] = useState<string>('');
   const [name, setName] = useState('');
+  const [note, setNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'pay_later' | 'pay_now'>('pay_later');
   const [paidConfirmation, setPaidConfirmation] = useState(false);
   const [expired, setExpired] = useState(false);
@@ -91,6 +92,19 @@ export default function LunchPage() {
       window.localStorage.setItem(CUSTOMER_NAME_STORAGE_KEY, name.trim());
     }
   }, [name]);
+
+  // Restore saved note on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem(LUNCH_NOTE_STORAGE_KEY);
+    if (saved) setNote(saved);
+  }, []);
+
+  // Persist note whenever edited
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(LUNCH_NOTE_STORAGE_KEY, note);
+  }, [note]);
 
   useEffect(() => {
     const load = async () => {
@@ -176,6 +190,7 @@ export default function LunchPage() {
           vegetable: selectedVeg,
           paymentMethod,
           paidConfirmation,
+          note: note.trim() || undefined,
         }),
       });
       router.push(`/orders?id=${created.orderNumber}`);
@@ -403,6 +418,20 @@ export default function LunchPage() {
                 placeholder="e.g. Alice"
                 disabled={formDisabled}
                 className="w-full px-4 py-3 rounded-xl border-2 border-primary/10 focus:border-primary outline-none bg-white dark:bg-slate-800 dark:text-slate-100"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-slate-900 dark:text-slate-100">
+                Note <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Any special instructions? (e.g: ít cơm, nhiều rau)"
+                rows={2}
+                disabled={formDisabled}
+                className="w-full px-4 py-3 rounded-xl border-2 border-primary/10 focus:border-primary outline-none bg-white dark:bg-slate-800 dark:text-slate-100 resize-none"
               />
             </div>
 
